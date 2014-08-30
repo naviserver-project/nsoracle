@@ -115,7 +115,7 @@ struct fetch_buffer {
 
     /* support for array DML: the array of values for this bind variable. */
     int array_count;
-    char **array_values;
+    CONST84 char **array_values;
 
     /* 2-byte signed integer indicating null-ness; if null, value will be -1 */
     sb2 is_null;
@@ -205,13 +205,13 @@ Tcl_CmdProc
     ora_column_command,
     ora_table_command;      
 
-static Ns_DbTableInfo *ora_get_table_info(Ns_DbHandle * dbh, char *table);
+static Ns_DbTableInfo *ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table);
 static char *ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, 
                             int system_tables_p);
-static      Ns_DbTableInfo *Ns_DbNewTableInfo(char *table);
+static      Ns_DbTableInfo *Ns_DbNewTableInfo(CONST84 char *table);
 static void Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo);
 static void Ns_DbAddColumnInfo(Ns_DbTableInfo * tinfo, Ns_Set * column_info);
-static int  Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, char *name);
+static int  Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name);
 
 #else
 static char *ora_best_row_id(Ns_DString * pds, Ns_DbHandle * dbh,
@@ -246,13 +246,13 @@ enum {
 static void ns_ora_log(const char *file, int line, const char *fn, char *fmt, ...);
 static void error(const char *file, int line, const char *fn, char *fmt, ...);
 static int oci_error_p(const char *file, int line, const char *fn,
-                       Ns_DbHandle * dbh, char *ocifn, char *query,
+                       Ns_DbHandle * dbh, char *ocifn, CONST char *query,
                        oci_status_t oci_status);
 static int tcl_error_p(const char *file, int line, const char *fn, Tcl_Interp * interp,
-        Ns_DbHandle * dbh, char *ocifn, char *query,
+        Ns_DbHandle * dbh, char *ocifn, CONST char *query,
         oci_status_t oci_status);
 static void downcase(char *s);
-static char *nilp(char *s);
+static CONST char *nilp(CONST char *s);
 static int stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh,
                             int rowind, OCILobLocator * lobl, char *path,
                             int to_conn_p, OCISvcCtx * svchp,
