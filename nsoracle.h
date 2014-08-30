@@ -315,8 +315,8 @@ static int lob_buffer_size = 16384;
 static int char_expansion;
 
 /* Prefetch parameters, if zero leave defaults */
-static ub4 prefetch_rows = 0;
-static ub4 prefetch_memory = 0;
+static int prefetch_rows = 0;
+static int prefetch_memory = 0;
 
 static Ns_DbProc ora_procs[] = {
     {DbFn_Name,         (void *) Ns_OracleName},

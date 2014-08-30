@@ -16,7 +16,7 @@
 #include "nsoracle.h"
 
 static sb2 null_ind = -1;
-static sb2 rc = 0;
+static ub2 rc = 0;
 static ub4 rl = 0;
 
 /*
@@ -2237,7 +2237,7 @@ OracleGetCols (Tcl_Interp *interp, int objc,
         char name[512];
         char *name1 = 0;
         ub2 coltype;
-        sb4 name1_size = 0;
+        ub4 name1_size = 0;
 
         oci_status = OCIParamGet(connection->stmt,
                                  OCI_HTYPE_STMT,
@@ -3377,7 +3377,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
            neither right now can be larger than 30 chars */
         char name[512];
         char *name1 = 0;
-        sb4 name1_size = 0;
+        ub4 name1_size = 0;
 
         /* set current fetch buffer */
         fetchbuf = &connection->fetch_buffers[i];
@@ -5346,7 +5346,7 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
 
         char name[512];
         char *name1;
-        sb4 name1_size;
+        ub4 name1_size;
         /* for formatting the int returns big enough for 64 bits */
 #define SBUF_BUFFER_SIZE 24
         char sbuf[SBUF_BUFFER_SIZE];
