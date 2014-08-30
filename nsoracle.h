@@ -25,6 +25,14 @@
 #include <sys/stat.h>
 #include <ns.h>
 
+#if defined(NS_VERSION)
+# define NS_AOLSERVER_3_PLUS 1
+# define Ns_Free ns_free
+# define Ns_Malloc ns_malloc
+# define Ns_Realloc ns_realloc
+# define Ns_StrDup ns_strdup
+#endif
+
 #ifndef NS_DML
 #include <nsdb.h>
 #endif

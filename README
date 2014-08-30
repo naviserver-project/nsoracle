@@ -31,6 +31,24 @@ How to Build:
   AOLserver bin directory.  "nsoraclecass.so" is the Cassandracle Oracle
   driver; it only permits SELECT statements.
 
+
+NaviServer Hints:
+
+  Compilation works for Oracle with Oracle client libs 
+  Version 11.2.0.4.0 (instant client package and 
+  instant client package SDK, 64-bit). Point
+  ORACLE_HOME to eg the following path
+
+     export ORACLE_HOME=/usr/local/src/oracle/instantclient_11_2/
+
+     # includes: under $ORACLE_HOME/sdk/include/
+     # libaries: $ORACLE_HOME/lib/
+
+  To build the binary under naviserver, use e.g.
+
+     make INST=/usr/local/ns
+
+
 NOTES:
 
    The "how-to write an AOLserver driver" docs are at

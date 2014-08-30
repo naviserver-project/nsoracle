@@ -37,7 +37,7 @@ dvoid *Ns_OracleRealloc(dvoid *cxt, dvoid *buf, size_t size) {
 
 /*{{{ Ns_OracleFree */
 void Ns_OracleFree(dvoid *cxt, dvoid *buf) {
-    return Ns_Free(buf);
+    Ns_Free(buf);
 }
 /*}}}*/
 
@@ -5651,7 +5651,7 @@ ora_get_column_index(Tcl_Interp * interp, Ns_DbTableInfo * tinfo,
 /* re-implement the ns_column command */
 int
 ora_column_command(ClientData dummy, Tcl_Interp * interp,
-        int argc, char *argv[]) 
+        int argc, CONST84 char *argv[])
 {
     int result = TCL_ERROR;
     Ns_DbHandle *handle;
@@ -5776,7 +5776,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
 /* re-implement the ns_table command */
 int
 ora_table_command(ClientData dummy, Tcl_Interp * interp,
-        int argc, char *argv[]) 
+        int argc, CONST84 char *argv[]) 
 {
     int result = TCL_ERROR;
     Ns_DString tables_string;

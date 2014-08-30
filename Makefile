@@ -48,11 +48,8 @@ OCI_VERSION=$(shell strings $(ORACLE_HOME)/lib/libclntsh.so | grep "^Version.[0-
 OCI_MAJOR_VERSION=$(shell echo $(OCI_VERSION) | cut -d ' ' -f2 | cut -d '.' -f1)
 NS_VERSION=$(shell grep NS_VERSION $(NSHOME)/include/ns.h)
 
-MODLIBS  =  -L$(ORACLE_HOME)/lib -lclntsh \
-	    -lcore$(OCI_MAJOR_VERSION) \
-	    -lcommon$(OCI_MAJOR_VERSION) \
-	    -lgeneric$(OCI_MAJOR_VERSION) \
-	    -lclient$(OCI_MAJOR_VERSION)
+MODLIBS  +=  -L$(ORACLE_HOME)/lib -lclntsh -locci -lnsthread -lnsd -lnsdb -ltcl8.5
+
 
 ifneq (,$(findstring NS_VERSION,$(NS_VERSION)))
 MODLIBS  +=  -lnsdb
@@ -69,10 +66,8 @@ include $(NSHOME)/include/Makefile.global
 
 # Tack on the oracle includes after Makefile.global stomps CFLAGS
 CFLAGS := \
-    -I$(ORACLE_HOME)/rdbms/demo \
-    -I$(ORACLE_HOME)/rdbms/public \
-    -I$(ORACLE_HOME)/network/public \
-    -I$(ORACLE_HOME)/plsql/public $(filter-out -Wconversion,$(CFLAGS))
+    -I$(ORACLE_HOME)/sdk/include \
+    $(filter-out -Wconversion,$(CFLAGS))
 
 all: $(MOD) $(MODCASS) 
 
