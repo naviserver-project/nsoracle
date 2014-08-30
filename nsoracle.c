@@ -2834,7 +2834,7 @@ Ns_OracleServerInit(char *hserver, char *hmodule, char *hdriver)
     ns_ora_log(lexpos(), "entry (%s, %s, %s)", nilp(hserver), nilp(hmodule),
         nilp(hdriver));
 
-    return Ns_TclInitInterps(hserver, Ns_OracleInterpInit, NULL);
+    return Ns_TclRegisterTrace(hserver, Ns_OracleInterpInit, NULL, NS_TCL_TRACE_CREATE);
 }
 /*}}}*/
 
@@ -5021,7 +5021,12 @@ stream_actually_write(int fd, Ns_Conn * conn, void *bufp, int length,
     ns_ora_log(lexpos(), "entry (%d, %d, %d)", fd, length, to_conn_p);
 
     if (to_conn_p) {
-        if (Ns_WriteConn(conn, bufp, length) == NS_OK) {
+        struct iovec sbuf;
+
+        sbuf.iov_base = bufp;
+        sbuf.iov_len = length;
+
+        if (Ns_ConnWriteVChars(conn, &sbuf, 1, NS_CONN_STREAM) == NS_OK) {
             bytes_written = length;
         } else {
             bytes_written = 0;
