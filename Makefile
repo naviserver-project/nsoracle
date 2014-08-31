@@ -7,9 +7,17 @@
 #
 
 ifdef INST
-NSHOME ?= $(INST)
+   NSHOME ?= $(INST)
+else ifdef NAVISERVER
+   NSHOME ?= $(NAVISERVER)
 else
-NSHOME ?= ../aolserver
+   # Typical location of this source directory appears to now be
+   # foo/naviserver/nsoracle/, not foo/nsoracle/ as it was in the
+   # AOLserver days, so use this default:
+   NSHOME ?= ..
+endif
+ifndef NAVISERVER
+   NAVISERVER ?= $(NSHOME)
 endif
 
 #
@@ -39,21 +47,22 @@ OBJSCASS =  nsoraclecass.o
 #
 # Header files in THIS directory
 #
-HDRS     =  
+HDRS     =  nsoracle.h
 
 #
 # Extra libraries
 #
 OCI_VERSION=$(shell strings $(ORACLE_HOME)/lib/libclntsh.so | grep "^Version.[0-9]\+\.[0-9]")
+# So e.g. "Version 10.2.0.1.0" becomes just "10":
 OCI_MAJOR_VERSION=$(shell echo $(OCI_VERSION) | cut -d ' ' -f2 | cut -d '.' -f1)
-NS_VERSION=$(shell grep NS_VERSION $(NSHOME)/include/ns.h)
+# With AOLserver this was in include/ns.h Naviserver moved it to here:
+NS_VERSION=$(shell grep NS_VERSION $(NSHOME)/include/nsversion.h)
 
 MODLIBS  +=  -L$(ORACLE_HOME)/lib -lclntsh -locci -lnsthread -lnsd -lnsdb -ltcl8.5
 
-
-ifneq (,$(findstring NS_VERSION,$(NS_VERSION)))
-MODLIBS  +=  -lnsdb
-endif
+# TODO: Do we still need these additional libraries?  They do still
+# exist at least for 10g, e.g. "libcore10.a":  --atp@piskorski.com, 2014/08/31
+#   -lcore$(OCI_MAJOR_VERSION) -lcommon$(OCI_MAJOR_VERSION) -lgeneric$(OCI_MAJOR_VERSION) -lclient$(OCI_MAJOR_VERSION)
 
 ########################################################################
 # Copied from Makefile.module because this module is a little more
@@ -62,11 +71,21 @@ endif
 # TODO: this should be possible to manage without maintaining a local copy of
 # Makefile.module
 
+# TODO: AFAICT the current NaviServer Makefile.global is better
+# behaved, it no longer "stomps on" CFLAGS at all, so we may be able
+# to simplify the stuff below, as the older todo comment above
+# suggests.  --atp@piskorski.com, 2014/08/30 06:18 EDT
+
 include $(NSHOME)/include/Makefile.global
 
+# Oracle 10.2.0 client include files are in "$ORACLE_HOME/rdbms/public",
+# while 11.2 apparently puts them in "$ORACLE_HOME/sdk/include", so
+# for simplicity just look in both places:
+
 # Tack on the oracle includes after Makefile.global stomps CFLAGS
-CFLAGS := \
-    -I$(ORACLE_HOME)/sdk/include \
+CFLAGS := -I$(ORACLE_HOME)/sdk/include \
+    -I$(ORACLE_HOME)/rdbms/demo -I$(ORACLE_HOME)/rdbms/public \
+    -I$(ORACLE_HOME)/network/public -I$(ORACLE_HOME)/plsql/public \
     $(filter-out -Wconversion,$(CFLAGS))
 
 all: $(MOD) $(MODCASS) 
@@ -81,7 +100,7 @@ $(MODCASS): $(OBJSCASS)
 
 $(OBJS): $(HDRS)
 
-$(OBJSCASS): $(HDRS) nsoracle.c
+$(OBJSCASS): nsoracle.c $(HDRS)
 	$(CC) $(CFLAGS) -DFOR_CASSANDRACLE=1 -o $@ -c $<
 
 install: all
