@@ -1711,7 +1711,6 @@ int
 OracleLobDMLBind (Tcl_Interp *interp, int objc, 
                   Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
 {
-    Tcl_Obj          *CONST*data;
     oci_status_t       oci_status;
     ora_connection_t  *connection;
     string_list_elt_t *bind_variables, *var_p;
@@ -1768,7 +1767,6 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    data = &objv[4];
     connection->n_columns = objc - 4;
 
     Tcl_SplitList(interp, Tcl_GetString(objv[4]), &lob_argc, &lob_argv);
@@ -2016,7 +2014,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
     OCIDefine         *def;
     char              *query;
     char              *filename = NULL;
-    char              *command, *subcommand;
+    char              *subcommand;
     int                blob_p = NS_FALSE;
     int                to_conn_p = NS_FALSE;
     int                nbytes = INT_MAX;
@@ -2028,7 +2026,6 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    command = Tcl_GetString(objv[0]);
     subcommand = Tcl_GetString(objv[1]);
     connection = dbh->connection;
 
