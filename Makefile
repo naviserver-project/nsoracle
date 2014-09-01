@@ -81,10 +81,9 @@ include $(NSHOME)/include/Makefile.global
 # for simplicity just look in both places:
 
 # Tack on the oracle includes after Makefile.global stomps CFLAGS
-CFLAGS := -I$(ORACLE_HOME)/sdk/include \
+CFLAGS += -I$(ORACLE_HOME)/sdk/include \
     -I$(ORACLE_HOME)/rdbms/demo -I$(ORACLE_HOME)/rdbms/public \
-    -I$(ORACLE_HOME)/network/public -I$(ORACLE_HOME)/plsql/public \
-    $(filter-out -Wconversion,$(CFLAGS))
+    -I$(ORACLE_HOME)/network/public -I$(ORACLE_HOME)/plsql/public
 
 all: $(MOD) $(MODCASS) 
 
