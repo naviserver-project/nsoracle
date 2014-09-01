@@ -939,12 +939,12 @@ OracleSelect (Tcl_Interp *interp, int objc,
     subcommand = Tcl_GetString(objv[1]);
 
     connection = dbh->connection;
-    connection->interp = interp;
 
     if (!connection) {
         Tcl_SetResult(interp, "error: no connection", NULL);
         return TCL_ERROR;
     }
+    connection->interp = interp;
 
     if (!strcmp(subcommand, "dml")) {
         dml_p = 1;
@@ -4290,16 +4290,16 @@ oci_error_p(const char *file, int line, const char *fn,
                      */
                     Ns_OracleFlush(dbh);
                     Ns_OracleCloseDb(dbh);
-                }
-
-                if (errorcode == 20 || errorcode == 1034) {
+               } else if (errorcode == 20 || errorcode == 1034) {
                     /* ora-00020 means 'maximum number of processes exceeded.
                      * ora-01034 means 'oracle not available'.
                      *           we want to make sure the oracleSID process
                      *           goes away so we don't make the problem worse
                      */
                     Ns_OracleCloseDb(dbh);
-                }
+                } else if (oci_status1) {
+		    Ns_Log(Warning, "nsoracle: Unhandled error status %d after OCIAttrGet()",errorcode);
+		}
             }
             break;
         case OCI_INVALID_HANDLE:
@@ -4432,7 +4432,9 @@ tcl_error_p(const char *file, int line, const char *fn,
                 Ns_OracleFlush(dbh);
                 Ns_OracleCloseDb(dbh);
                 Ns_OracleOpenDb(dbh);
-            }
+            } else if (oci_status1) {
+	        Ns_Log(Warning, "nsoracle: Unhandled error status %d after OCIAttrGet()",errorcode);
+	    }
         }
         break;
     case OCI_INVALID_HANDLE:
@@ -5328,6 +5330,8 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
                                 stmt,
                                 connection->err,
                                 0, 0, NULL, NULL, OCI_DESCRIBE_ONLY);
+    if (oci_error_p(lexpos(), dbh, "OCIStmtExecute", sql, oci_status))
+        return 0;
 
     oci_status = OCIAttrGet(stmt,
                             OCI_HTYPE_STMT,
@@ -5471,6 +5475,10 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
 /* poke around in Oracle and see what are all the possible tables */
 static char *
 ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
+  NS_GNUC_NONNULL(1) NS_GNUC_NONNULL(2);
+
+static char *
+ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
 {
     oci_status_t oci_status;
     ora_connection_t *connection;
@@ -5490,12 +5498,10 @@ ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
     ns_ora_log(lexpos(), "entry (pds %p, dbh %p, system_tables_p %d)",
         pds, dbh, system_tables_p);
 
-    ns_ora_log(lexpos(), "user: %s", nilp(dbh->user));
+    assert(pds);
+    assert(dbh);
 
-    if (!pds || !dbh) {
-        error(lexpos(), "invalid args.");
-        goto bailout;
-    }
+    ns_ora_log(lexpos(), "user: %s", nilp(dbh->user));
 
     connection = dbh->connection;
     if (!connection) {
