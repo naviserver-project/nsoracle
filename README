@@ -44,9 +44,10 @@ NaviServer Hints:
      # includes: under $ORACLE_HOME/sdk/include/
      # libaries: $ORACLE_HOME/lib/
 
-  To build the binary under naviserver, use e.g.
+  To build and install the binary under naviserver, use e.g.
 
-     make INST=/usr/local/ns
+     make
+     make install
 
 
 NOTES:
