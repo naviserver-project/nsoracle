@@ -11,11 +11,9 @@ ifdef INST
 else ifdef NAVISERVER
    NSHOME ?= $(NAVISERVER)
 else
-   # Typical location of this source directory appears to now be
-   # foo/naviserver/nsoracle/, not foo/nsoracle/ as it was in the
-   # AOLserver days, so use this default:
-   NSHOME ?= ..
+    NSHOME = /usr/local/ns
 endif
+
 ifndef NAVISERVER
    NAVISERVER ?= $(NSHOME)
 endif
