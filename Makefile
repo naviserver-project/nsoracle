@@ -39,7 +39,7 @@ MODCASS  =  nsoraclecass.so
 #
 # Objects to build
 #
-OBJS     =  nsoracle.o
+MODOBJS  =  nsoracle.o
 OBJSCASS =  nsoraclecass.o
 
 #
@@ -63,18 +63,6 @@ MODLIBS  +=  -L$(ORACLE_HOME)/lib -lclntsh -locci -lnsthread -lnsd -lnsdb -ltcl8
 #   -lcore$(OCI_MAJOR_VERSION) -lcommon$(OCI_MAJOR_VERSION) -lgeneric$(OCI_MAJOR_VERSION) -lclient$(OCI_MAJOR_VERSION)
 
 ########################################################################
-# Copied from Makefile.module because this module is a little more
-# complicated.
-
-# TODO: this should be possible to manage without maintaining a local copy of
-# Makefile.module
-
-# TODO: AFAICT the current NaviServer Makefile.global is better
-# behaved, it no longer "stomps on" CFLAGS at all, so we may be able
-# to simplify the stuff below, as the older todo comment above
-# suggests.  --atp@piskorski.com, 2014/08/30 06:18 EDT
-
-include $(NSHOME)/include/Makefile.global
 
 # Oracle 10.2.0 client include files are in "$ORACLE_HOME/rdbms/public",
 # while 11.2 apparently puts them in "$ORACLE_HOME/sdk/include", so
@@ -85,17 +73,15 @@ CFLAGS += -I$(ORACLE_HOME)/sdk/include \
     -I$(ORACLE_HOME)/rdbms/demo -I$(ORACLE_HOME)/rdbms/public \
     -I$(ORACLE_HOME)/network/public -I$(ORACLE_HOME)/plsql/public
 
-all: $(MOD) $(MODCASS) 
+include $(NSHOME)/include/Makefile.module
 
-$(MOD): $(OBJS)
-	$(RM) $@
-	$(LDSO) $(LDFLAGS) -o $@ $(OBJS) $(MODLIBS) $(LIBS)
+LD_LIBRARY_PATH	= LD_LIBRARY_PATH="./:$$LD_LIBRARY_PATH"
+
+all: $(MOD) $(MODCASS) 
 
 $(MODCASS): $(OBJSCASS)
 	$(RM) $@
-	$(LDSO) $(LDFLAGS) -o $@ $(OBJSCASS) $(MODLIBS) $(LIBS)
-
-$(OBJS): $(HDRS)
+	$(LDSO) $(LDFLAGS) -o $@ $(OBJSCASS) $(MODLIBS) $(NSLIBS)
 
 $(OBJSCASS): nsoracle.c $(HDRS)
 	$(CC) $(CFLAGS) -DFOR_CASSANDRACLE=1 -o $@ -c $<
@@ -107,7 +93,7 @@ install: all
 	$(INSTALL_SH) $(MODCASS) $(INSTBIN)/
 
 clean:
-	$(RM) $(OBJS) $(MOD) $(OBJSCASS) $(MODCASS)
+	$(RM) $(MODOBJS) $(MOD) $(OBJSCASS) $(MODCASS)
 
 clobber: clean
 	$(RM) *.so *.o *.a *~
