@@ -3854,7 +3854,6 @@ Ns_OracleFlush (Ns_DbHandle *dbh)
 {
     ora_connection_t *connection;
     oci_status_t      oci_status;
-    int i;
 
     ns_ora_log(lexpos(), "entry (dbh %p, row %p)", dbh, 0);
 
@@ -3880,6 +3879,8 @@ Ns_OracleFlush (Ns_DbHandle *dbh)
     connection->interp = NULL;
 
     if (connection->fetch_buffers != 0) {
+        int i;
+
         for (i = 0; i < connection->n_columns; i++) {
             fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
 
@@ -4779,7 +4780,6 @@ get_data(dvoid * ctxp, OCIBind * bindp,
     ora_connection_t *connection;
     fetch_buffer_t   *buf;
     oci_status_t      oci_status;
-    int               i;
 
     ns_ora_log(lexpos(), "entry (dbh %p; iter %d, index %d)", ctxp, iter, index);
 
@@ -4793,6 +4793,8 @@ get_data(dvoid * ctxp, OCIBind * bindp,
     dbh = connection->dbh;
 
     if (buf->lobs == 0) {
+        int i;
+
         oci_status = OCIAttrGet(bindp,
                                 OCI_HTYPE_BIND,
                                 (oci_attribute_t *) & buf->n_rows,
@@ -5291,7 +5293,6 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
     char sql[SQL_BUFFER_SIZE];
     OCIStmt *stmt;
     Ns_DbTableInfo *tinfo;
-    Ns_Set *cinfo;
     int i;
     sb4 n_columns;
 
@@ -5344,7 +5345,7 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
 
     for (i = 0; i < n_columns; i++) {
         OCIParam *param;
-
+        Ns_Set *cinfo;
         char name[512];
         char *name1;
         ub4 name1_size;
@@ -5938,9 +5939,9 @@ Ns_DbAddColumnInfo(Ns_DbTableInfo * tinfo, Ns_Set * column_info)
 static void 
 Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo) 
 {
-    int i;
-
     if (tinfo != NULL) {
+        int i;
+
         for (i = 0; i < tinfo->ncolumns; i++) {
             Ns_SetFree(tinfo->columns[i]);
         }
@@ -5949,7 +5950,6 @@ Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo)
         Ns_Free(tinfo->columns);
         Ns_Free(tinfo);
     }
-
 }
 /*}}}*/
 
