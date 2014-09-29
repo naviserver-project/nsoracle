@@ -805,8 +805,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
             /*  This is the variable we're going to return
              *  as the result.
              */
-            retbuf = fetchbuf->buf = Ns_Malloc(EXEC_PLSQL_BUFFER_SIZE);
-            memset(retbuf, (int)'\0', (size_t)EXEC_PLSQL_BUFFER_SIZE);
+	    retbuf = fetchbuf->buf = ns_calloc(1, EXEC_PLSQL_BUFFER_SIZE);
             strncpy(retbuf, value, EXEC_PLSQL_BUFFER_SIZE);
             fetchbuf->fetch_length = EXEC_PLSQL_BUFFER_SIZE;
             fetchbuf->is_null = 0;
@@ -4855,11 +4854,9 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
 #else
     ssize_t readlen;
 #endif
-    int status = NS_ERROR;
+    int status = NS_ERROR, fd;
     oci_status_t oci_status = OCI_SUCCESS;
     struct stat statbuf;
-
-    int fd = -1;
 
     fd = open(path, O_RDONLY | EXTRA_OPEN_FLAGS);
 
