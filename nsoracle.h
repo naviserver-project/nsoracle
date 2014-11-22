@@ -319,24 +319,24 @@ static int prefetch_rows = 0;
 static int prefetch_memory = 0;
 
 static Ns_DbProc ora_procs[] = {
-    {DbFn_Name,         (void *) Ns_OracleName},
-    {DbFn_DbType,       (void *) Ns_OracleDbType},
-    {DbFn_OpenDb,       (void *) Ns_OracleOpenDb},
-    {DbFn_CloseDb,      (void *) Ns_OracleCloseDb},
-    {DbFn_DML,          (void *) Ns_OracleDML},
-    {DbFn_Select,       (void *) Ns_OracleSelect},
-    {DbFn_Exec,         (void *) Ns_OracleExec},
-    {DbFn_BindRow,      (void *) Ns_OracleBindRow},
-    {DbFn_GetRow,       (void *) Ns_OracleGetRow},
-    {DbFn_Flush,        (void *) Ns_OracleFlush},
-    {DbFn_Cancel,       (void *) Ns_OracleFlush},
-    {DbFn_ServerInit,   (void *) Ns_OracleServerInit},
-    {DbFn_ResetHandle,  (void *) Ns_OracleResetHandle},
+    {DbFn_Name,         (Ns_Callback *) Ns_OracleName},
+    {DbFn_DbType,       (Ns_Callback *) Ns_OracleDbType},
+    {DbFn_OpenDb,       (Ns_Callback *) Ns_OracleOpenDb},
+    {DbFn_CloseDb,      (Ns_Callback *) Ns_OracleCloseDb},
+    {DbFn_DML,          (Ns_Callback *) Ns_OracleDML},
+    {DbFn_Select,       (Ns_Callback *) Ns_OracleSelect},
+    {DbFn_Exec,         (Ns_Callback *) Ns_OracleExec},
+    {DbFn_BindRow,      (Ns_Callback *) Ns_OracleBindRow},
+    {DbFn_GetRow,       (Ns_Callback *) Ns_OracleGetRow},
+    {DbFn_Flush,        (Ns_Callback *) Ns_OracleFlush},
+    {DbFn_Cancel,       (Ns_Callback *) Ns_OracleFlush},
+    {DbFn_ServerInit,   (Ns_Callback *) Ns_OracleServerInit},
+    {DbFn_ResetHandle,  (Ns_Callback *) Ns_OracleResetHandle},
 #if !defined(NS_AOLSERVER_3_PLUS)
     /* These aren't supported in AOLserver 3 */
-    {DbFn_GetTableInfo, (void *) ora_get_table_info},
-    {DbFn_TableList,    (void *) ora_table_list},
-    {DbFn_BestRowId,    (void *) ora_best_row_id},
+    {DbFn_GetTableInfo, (Ns_Callback *) ora_get_table_info},
+    {DbFn_TableList,    (Ns_Callback *) ora_table_list},
+    {DbFn_BestRowId,    (Ns_Callback *) ora_best_row_id},
 #endif
     {0, NULL,}
 };

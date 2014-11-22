@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*  
  *  An Oracle OCI internal driver for AOLserver
  *
@@ -10,7 +8,7 @@
  *  Extended 2000      by markd@arsdigita.com, curtisg@arsdigita.com, jsalz@mit.edu, 
  *                        jsc@arsdigita.com, mayoff@arsdigita.com
  *  Extended 2002-2004 by Jeremy Collins <jeremy.collins@tclsource.org>
- *
+ *  Extended 2014      by Gustaf Neumann (cleanup, NaviServer adjustments)
  */
 
 #include "nsoracle.h"
@@ -5726,8 +5724,8 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
             != TCL_OK) {
             goto bailout;
         }
-        Tcl_SetResult(interp, tinfo->columns[colindex]->name,
-                      TCL_VOLATILE);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(tinfo->columns[colindex]->name, -1));
+
     } else if (!strcmp(argv[1], "type")) {
         if (argc != 5) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
@@ -5958,7 +5956,7 @@ Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name)
     int result = -1;
 
     for (i = 0; i < tinfo->ncolumns; i++) {
-        char *cname = tinfo->columns[i]->name;
+        const char *cname = tinfo->columns[i]->name;
         if ((cname == name)
             || ((cname == NULL) && (name == NULL))
             || (strcmp(cname, name) == 0)) {
