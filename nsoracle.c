@@ -2804,7 +2804,7 @@ Ns_DbDriverInit (char *hdriver, char *config_path)
 
 /*{{{ Ns_OracleInterpInit */
 static int 
-Ns_OracleInterpInit (Tcl_Interp *interp, void *dummy)
+Ns_OracleInterpInit (Tcl_Interp *interp, const void *dummy)
 {
     Tcl_CreateObjCommand (interp, "ns_ora", OracleObjCmd, 
             (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
