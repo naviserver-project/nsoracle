@@ -3932,7 +3932,6 @@ Ns_OracleFlush (Ns_DbHandle *dbh)
 static int 
 Ns_OracleResetHandle (Ns_DbHandle *dbh)
 {
-    oci_status_t oci_status;
     ora_connection_t *connection;
 
     ns_ora_log(lexpos(), "entry (dbh %p)", dbh);
@@ -3949,6 +3948,8 @@ Ns_OracleResetHandle (Ns_DbHandle *dbh)
     }
 
     if (connection->mode == transaction) {
+        oci_status_t oci_status;
+
         oci_status = OCITransRollback(connection->svc,
                                       connection->err, OCI_DEFAULT);
         if (oci_error_p(lexpos(), dbh, "OCITransRollback", 0, oci_status))
@@ -4776,7 +4777,6 @@ get_data(dvoid * ctxp, OCIBind * bindp,
     Ns_DbHandle      *dbh;
     ora_connection_t *connection;
     fetch_buffer_t   *buf;
-    oci_status_t      oci_status;
 
     ns_ora_log(lexpos(), "entry (dbh %p; iter %d, index %d)", ctxp, iter, index);
 
@@ -4790,6 +4790,7 @@ get_data(dvoid * ctxp, OCIBind * bindp,
     dbh = connection->dbh;
 
     if (buf->lobs == 0) {
+        oci_status_t oci_status;
         int i;
 
         oci_status = OCIAttrGet(bindp,
