@@ -4236,15 +4236,15 @@ oci_error_p(const char *file, int line, const char *fn,
     switch (oci_status) {
 
         case OCI_NEED_DATA:
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_NEED_DATA");
+	    snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_NEED_DATA");
             break;
         case OCI_NO_DATA:
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_NO_DATA");
+            snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_NO_DATA");
             break;
         case OCI_ERROR:
 
             if (connection == 0)
-                snprintf(msgbuf, STACK_BUFFER_SIZE, "NULL connection");
+                snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "NULL connection");
             else {
                 oci_status_t oci_status1;
                 char         errorbuf[1024];
@@ -4256,7 +4256,7 @@ oci_error_p(const char *file, int line, const char *fn,
                                           (OraText *)errorbuf,
                                           sizeof errorbuf, OCI_HTYPE_ERROR);
                 if (oci_status1) {
-                    snprintf(msgbuf, STACK_BUFFER_SIZE,
+                    snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", 
                              "`OCIErrorGet ()' error");
                 } else {
                     snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", errorbuf);
@@ -4302,13 +4302,13 @@ oci_error_p(const char *file, int line, const char *fn,
             }
             break;
         case OCI_INVALID_HANDLE:
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_INVALID_HANDLE");
+            snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_INVALID_HANDLE");
             break;
         case OCI_STILL_EXECUTING:
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_STILL_EXECUTING");
+            snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_STILL_EXECUTING");
             break;
         case OCI_CONTINUE:
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_CONTINUE");
+            snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_CONTINUE");
             break;
     }
 
@@ -4380,18 +4380,18 @@ tcl_error_p(const char *file, int line, const char *fn,
 
     switch (oci_status) {
     case OCI_SUCCESS_WITH_INFO:
-        snprintf(msgbuf, STACK_BUFFER_SIZE,
+        snprintf(msgbuf, STACK_BUFFER_SIZE,"%s", 
                  "Error - OCI_SUCCESS_WITH_INFO");
         break;
     case OCI_NEED_DATA:
-        snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_NEED_DATA");
+        snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_NEED_DATA");
         break;
     case OCI_NO_DATA:
-        snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_NO_DATA");
+        snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_NO_DATA");
         break;
     case OCI_ERROR:
         if (connection == 0)
-            snprintf(msgbuf, STACK_BUFFER_SIZE, "NULL connection");
+            snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "NULL connection");
         else {
             char errorbuf[512];
             oci_status_t oci_status1;
@@ -4404,7 +4404,7 @@ tcl_error_p(const char *file, int line, const char *fn,
                                       sizeof errorbuf, OCI_HTYPE_ERROR);
 
             if (oci_status1) {
-                snprintf(msgbuf, STACK_BUFFER_SIZE, "`OCIErrorGet ()' error");
+                snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "`OCIErrorGet ()' error");
             } else {
                 snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", errorbuf);
             }
@@ -4437,13 +4437,13 @@ tcl_error_p(const char *file, int line, const char *fn,
         }
         break;
     case OCI_INVALID_HANDLE:
-        snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_INVALID_HANDLE");
+        snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_INVALID_HANDLE");
         break;
     case OCI_STILL_EXECUTING:
-        snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_STILL_EXECUTING");
+        snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_STILL_EXECUTING");
         break;
     case OCI_CONTINUE:
-        snprintf(msgbuf, STACK_BUFFER_SIZE, "Error - OCI_CONTINUE");
+        snprintf(msgbuf, STACK_BUFFER_SIZE, "%s", "Error - OCI_CONTINUE");
         break;
     }
 
