@@ -1764,7 +1764,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    connection->n_columns = objc - 4;
+    //connection->n_columns = objc - 4;
 
     Tcl_SplitList(interp, Tcl_GetString(objv[4]), &lob_argc, &lob_argv);
 
