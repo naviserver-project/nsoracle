@@ -5699,7 +5699,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
                              argv[0], " ", argv[1], " dbId table\"", NULL);
             goto bailout;
         }
-        sprintf(interp->result, "%d", tinfo->ncolumns);
+        Tcl_SetObjResult(interp, Tcl_NewIntObj(tinfo->ncolumns));
 
     } else if (!strcmp(argv[1], "exists")) {
         if (argc != 5) {

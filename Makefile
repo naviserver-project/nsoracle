@@ -56,7 +56,7 @@ OCI_MAJOR_VERSION=$(shell echo $(OCI_VERSION) | cut -d ' ' -f2 | cut -d '.' -f1)
 # With AOLserver this was in include/ns.h Naviserver moved it to here:
 NS_VERSION=$(shell grep NS_VERSION $(NSHOME)/include/nsversion.h)
 
-MODLIBS  +=  -L$(ORACLE_HOME)/lib -lclntsh -locci -lnsthread -lnsd -lnsdb -ltcl8.5
+MODLIBS  +=  -L$(ORACLE_HOME)/lib -lclntsh -locci -lnsthread -lnsd -lnsdb -ltcl8.6
 
 # TODO: Do we still need these additional libraries?  They do still
 # exist at least for 10g, e.g. "libcore10.a":  --atp@piskorski.com, 2014/08/31
