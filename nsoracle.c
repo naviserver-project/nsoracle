@@ -591,9 +591,7 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
 	return TCL_ERROR;
     }
 
-    if (dbh->verbose) {
-	Ns_Log (Notice, "SQL():  %s", query);
-    }
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
       
     oci_status = OCIHandleAlloc (connection->env,
                                  (oci_handle_t **) &connection->stmt,
@@ -704,9 +702,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    if (dbh->verbose) {
-        Ns_Log (Notice, "SQL():  %s", query);
-    }
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
       
     oci_status = OCIHandleAlloc (connection->env,
                                  (oci_handle_t **) &connection->stmt,
@@ -814,10 +810,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
             fetchbuf->is_null = 0;
         }
 
-        if (dbh->verbose) {
-            Ns_Log(Notice, "bind variable '%s' = '%s'", var_p->string, value);
-        }
-
+        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora exec_plsql_bind:  binding variable %s", 
                 var_p->string);
 
@@ -975,8 +968,19 @@ OracleSelect (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    if (dbh->verbose)
-        Ns_Log(Notice, "SQL():  %s", query);
+    /*
+     * In the old days we'd do this sort of thing:
+     *    if(dbh->verbose) Ns_Log(Notice, "SQL():  %s", query);
+     * But that no longer works in the current NaviServer.  The database
+     * handle verbose flag is obsolete, and dbh->verbose is apparently ALWAYS
+     * false.  Instead, set this in your config file:
+     *    ns_logctl severity Debug(sql) on
+     * And the calls below like this will then emit SQL into the log:
+     *    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+     * --atp@piskorski.com, 2017/08/28 10:32 EDT
+     */
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+
 
     /* In order to handle transactions we check now for our
      * custom SQL-like commands.  If query is one of those
@@ -1237,11 +1241,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
             fetchbuf->is_null = 0;
         }
 
-        if (dbh->verbose) {
-            Ns_Log(Notice, "bind variable '%s' = '%s'", var_p->string,
-                    value);
-        }
-
+        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora dml:  binding variable %s", var_p->string);
 
         if (array_p || dml_p) {
@@ -1530,8 +1530,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    if (dbh->verbose)
-        Ns_Log(Notice, "SQL():  %s", query);
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
@@ -1615,18 +1614,14 @@ OracleLobDML (Tcl_Interp *interp, int objc,
 
         ub4 length = -1;
 
-        if (!files_p)
+        if (files_p) {
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, file name %s", i, 
+                   Tcl_GetString(data[i]));
+        } else {
             length = strlen(Tcl_GetString(data[i]));
-
-        if (dbh->verbose) {
-            if (files_p) {
-                Ns_Log(Notice, "  CLOB # %d, file name %s", i, 
-                        Tcl_GetString(data[i]));
-            } else {
-                Ns_Log(Notice, "  CLOB # %d, length %d: %s", i, length,
-                        (length == 0) ? "(NULL)" : 
-                        Tcl_GetString(data[i]));
-            }
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, length %d: %s", i, length,
+                   (length == 0) ? "(NULL)" : 
+                   Tcl_GetString(data[i]));
         }
 
         /* if length is zero, that's an empty string.  Bypass the LobWrite
@@ -1741,8 +1736,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    if (dbh->verbose)
-        Ns_Log(Notice, "SQL():  %s", query);
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
@@ -1826,10 +1820,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
         fetchbuf->fetch_length = strlen(fetchbuf->buf) + 1;
         fetchbuf->is_null = 0;
 
-        if (dbh->verbose)
-            Ns_Log(Notice, "bind variable '%s' = '%s'", var_p->string,
-                   value);
-
+        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora clob_dml:  binding variable %s",
             var_p->string);
 
@@ -1908,17 +1899,13 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
             continue;
         }
 
-        if (!files_p)
-            length = strlen(fetchbuf->buf);
 
-        if (dbh->verbose) {
-            if (files_p) {
-                Ns_Log(Notice, "  CLOB # %d, file name %s", i,
-                       fetchbuf->buf);
-            } else {
-                Ns_Log(Notice, "  CLOB # %d, length %d: %s", i, length,
-                       (length == 0) ? "(NULL)" : fetchbuf->buf);
-            }
+        if (files_p) {
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, file name %s", i, fetchbuf->buf);
+        } else {
+            length = strlen(fetchbuf->buf);
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, length %d: %s", i, length,
+                   (length == 0) ? "(NULL)" : fetchbuf->buf);
         }
 
         /* if length is zero, that's an empty string.  Bypass the LobWrite
@@ -2066,8 +2053,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
         goto write_lob_cleanup;
     }
 
-    if (dbh->verbose)
-        Ns_Log(Notice, "SQL():  %s", query);
+    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
 
     oci_status = OCIDescriptorAlloc(connection->env,
                                     (dvoid **) & lob,
@@ -5971,3 +5957,13 @@ Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name)
 /*}}}*/
 
 #endif
+
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 4
+ * fill-column: 78
+ * indent-tabs-mode: nil
+ * End:
+ */
