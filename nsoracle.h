@@ -1,6 +1,6 @@
 /* $Id$ */
 
-#define NSORACLE_VERSION       "2.8a1"
+#define NSORACLE_VERSION       "2.8a2"
 
 #define STACK_BUFFER_SIZE      20000
 #define EXEC_PLSQL_BUFFER_SIZE 4096

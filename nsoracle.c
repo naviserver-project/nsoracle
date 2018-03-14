@@ -8,7 +8,7 @@
  *  Extended 2000      by markd@arsdigita.com, curtisg@arsdigita.com, jsalz@mit.edu, 
  *                        jsc@arsdigita.com, mayoff@arsdigita.com
  *  Extended 2002-2004 by Jeremy Collins <jeremy.collins@tclsource.org>
- *  Extended 2014      by Gustaf Neumann (cleanup, NaviServer adjustments)
+ *  Extended 2014-2018 by Gustaf Neumann (cleanup, NaviServer adjustments)
  */
 
 #include "nsoracle.h"
@@ -16,6 +16,7 @@
 static sb2 null_ind = -1;
 static ub2 rc = 0;
 static ub4 rl = 0;
+NS_EXPORT NsDb_DriverInitProc Ns_DbDriverInit;
 
 /*
  * [ns_ora] implementation.
@@ -191,7 +192,7 @@ OracleObjCmd (ClientData clientData, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (!dbh->connection) {
+    if (dbh->connection == NULL) {
         Tcl_SetResult(interp, "error: no connection", NULL);
         return TCL_ERROR;
     }
@@ -2354,7 +2355,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
     }
 
     connection = dbh->connection;
-    if (!connection) {
+    if (connection == NULL) {
         Tcl_SetResult(interp, "error: no connection", NULL);
         return TCL_ERROR;
     }
@@ -2732,7 +2733,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
    initializing OCI and registering our functions
 */
 NS_EXPORT int 
-Ns_DbDriverInit (char *hdriver, char *config_path) 
+Ns_DbDriverInit (const char *hdriver, const char *config_path)
 {
     int ns_status;
 
@@ -2873,7 +2874,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
 
     ns_ora_log(lexpos(), "entry (dbh %p)", dbh);
 
-    if (!dbh) {
+    if (dbh == NULL) {
         error(lexpos(), "invalid args.");
         return NS_ERROR;
     }
@@ -3027,7 +3028,7 @@ Ns_OracleCloseDb (Ns_DbHandle *dbh)
 
     ns_ora_log(lexpos(), "entry (dbh %p)", dbh);
 
-    if (!dbh) {
+    if (dbh == NULL) {
         error(lexpos(), "invalid args.");
         return NS_ERROR;
     }
@@ -3088,7 +3089,7 @@ Ns_OracleSelect (Ns_DbHandle *dbh, char *sql)
 
     ns_ora_log(lexpos(), "entry (dbh %p, sql %s)", dbh, nilp(sql));
 
-    if (!dbh || !sql) {
+    if (dbh  == NULL || sql == NULL) {
         error(lexpos(), "invalid args.");
         return 0;
     }
@@ -3149,7 +3150,7 @@ Ns_OracleExec (Ns_DbHandle *dbh, char *sql)
     ns_ora_log(lexpos(), "generate simple message");
     ns_ora_log(lexpos(), "entry (dbh %p, sql %s)", dbh, nilp(sql));
 
-    if (!dbh || !sql) {
+    if (dbh == NULL || sql == NULL) {
         error(lexpos(), "invalid args.");
         return NS_ERROR;
     }
@@ -3310,7 +3311,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
 
     ns_ora_log(lexpos(), "entry (dbh %p)", dbh);
 
-    if (!dbh) {
+    if (dbh == NULL) {
         error(lexpos(), "invalid args.");
         return 0;
     }
@@ -3588,7 +3589,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
 
     ns_ora_log(lexpos(), "entry (dbh %p, row %p)", dbh, row);
 
-    if (!dbh || !row) {
+    if (dbh == NULL || row == NULL) {
         error(lexpos(), "invalid args.");
         return NS_ERROR;
     }
@@ -3840,14 +3841,14 @@ Ns_OracleFlush (Ns_DbHandle *dbh)
 
     ns_ora_log(lexpos(), "entry (dbh %p, row %p)", dbh, 0);
 
-    if (dbh == 0) {
+    if (dbh == NULL) {
         error(lexpos(), "invalid args, `NULL' database handle");
         return NS_ERROR;
     }
 
     connection = dbh->connection;
 
-    if (connection == 0) {
+    if (connection == NULL) {
         /* Connection is closed.  That's as good as flushed to me */
         return NS_OK;
     }
@@ -3922,7 +3923,7 @@ Ns_OracleResetHandle (Ns_DbHandle *dbh)
 
     ns_ora_log(lexpos(), "entry (dbh %p)", dbh);
 
-    if (!dbh) {
+    if (dbh == NULL) {
         error(lexpos(), "invalid args.");
         return 0;
     }
@@ -4194,7 +4195,6 @@ oci_error_p(const char *file, int line, const char *fn,
 
     char             *msgbuf;
     char             *buf;
-    char              exceptbuf[EXCEPTION_CODE_SIZE + 1];
 
     if (dbh) {
         connection = dbh->connection;
@@ -4322,11 +4322,15 @@ oci_error_p(const char *file, int line, const char *fn,
 
     Ns_Log(Error, "%s", buf);
 
-    /* We need to call this so that AOLserver will print out the relevant
-     * error on pages served to browsers where ClientDebug is set.
-     */
-    snprintf(exceptbuf, EXCEPTION_CODE_SIZE, "%d", (int) errorcode);
-    Ns_DbSetException(dbh, exceptbuf, buf);
+    if (dbh != NULL) {
+        char exceptbuf[EXCEPTION_CODE_SIZE + 1];
+
+        /* We need to call this so that AOLserver will print out the relevant
+         * error on pages served to browsers where ClientDebug is set.
+         */
+        snprintf(exceptbuf, EXCEPTION_CODE_SIZE, "%d", (int) errorcode);
+        Ns_DbSetException(dbh, exceptbuf, buf);
+    }
 
     Ns_Free(msgbuf);
     Ns_Free(buf);
@@ -5280,7 +5284,7 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
 
     ns_ora_log(lexpos(), "entry (dbh %p, table %s)", dbh, nilp(table));
 
-    if (!dbh || !table) {
+    if (dbh == NULL || table == NULL) {
         error(lexpos(), "invalid args.");
         return 0;
     }
