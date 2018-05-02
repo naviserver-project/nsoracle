@@ -61,7 +61,7 @@ NOTES:
    The documentation for this driver (including a couple of special Tcl API
    calls) is at http://www.arsdigita.com/free-tools/oracle-driver.html
 
-   Config paramters in [ns/db/driver/drivername]:
+   Config parameters in [ns/db/driver/drivername]:
 
      Debug: boolean (Defaults to off)
         Enable the "log" call so that lots of stuff gets sent to the
@@ -79,7 +79,7 @@ NOTES:
    ns_ora clob_dml SQL is logged when verbose=on in the pool's configuration
    section.
 
-   To make a "safe" driver (say for servers running with DBA priviliges) that
+   To make a "safe" driver (say for servers running with DBA privileges) that
    only allows SELECT statements, define FOR_CASSANDRACLE when compiling this
 
 

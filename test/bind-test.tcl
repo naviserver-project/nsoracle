@@ -416,7 +416,7 @@ set int_blah_1 1
 set int_blah_2 2
 
 
-# I've successfuly done 10,000
+# I've successfully done 10,000
 
 for { set i 0 } { $i < 500 } { incr i } {
     set int_$i 3
