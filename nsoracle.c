@@ -188,7 +188,7 @@ OracleObjCmd (ClientData clientData, Tcl_Interp *interp,
     if (Ns_DbDriverName(dbh) != ora_driver_name) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "handle: '",
                 Tcl_GetString(objv[1]), "' is not of type ", 
-                ora_driver_name, NULL);
+                               ora_driver_name, (char*)0L);
         return TCL_ERROR;
     }
 
@@ -269,7 +269,7 @@ OracleObjCmd (ClientData clientData, Tcl_Interp *interp,
 		    "resultid, resultrows, clob_dml, clob_dml_file, "
 		    "clob_get_file, blob_dml, blob_dml_file, "
 		    "blob_get_file, dml, select, 1row, "
-                     "0or1row, or exec_plsql.", NULL);
+                     "0or1row, or exec_plsql.", (char*)0L);
     }
 
     return NS_OK;
@@ -368,7 +368,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
             /* The only time a bind variable can not exist is if its strictly
                an OUT variable, or if its a REF CURSOR.  */
             Tcl_AppendResult(interp, " bind variable :", var_p->string, 
-                    " does not exist. ", NULL);
+                    " does not exist. ", (char*)0L);
             Ns_OracleFlush(dbh);
             string_list_free_list(bind_variables);
             free_fetch_buffers(connection);
@@ -588,7 +588,7 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
       
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult (interp, "SQL ", query, " has been rejected "
-	        "by the Oracle driver", NULL);
+	        "by the Oracle driver", (char*)0L);
 	return TCL_ERROR;
     }
 
@@ -655,7 +655,7 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
       
-    Tcl_AppendResult (interp, buf, NULL);
+    Tcl_AppendResult (interp, buf, (char*)0L);
     Ns_Free(buf);
 
     return NS_OK;
@@ -689,7 +689,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
     if (objc < 5) {
         Tcl_AppendResult (interp, "wrong number of args: should be `",
 	        Tcl_GetString(objv[0]), 
-                " exec_plsql_bind dbId sql retvar <args>'", NULL);
+                " exec_plsql_bind dbId sql retvar <args>'", (char*)0L);
 	return TCL_ERROR;
     }
       
@@ -699,7 +699,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
     
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult (interp, "SQL ", query, " has been rejected " 
-                "by the Oracle driver", NULL);
+                          "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -756,11 +756,11 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
                     Tcl_AppendResult (interp, 
                             "invalid positional variable `:",
                             var_p->string, 
-                            "', valid values start with 1", NULL);
+                            "', valid values start with 1", (char*)0L);
                 } else {
                     Tcl_AppendResult (interp, 
                             "not enough arguments for positional variable ':",
-                            var_p->string, "'", NULL);
+                            var_p->string, "'", (char*)0L);
                 }
 
                 Ns_OracleFlush(dbh);
@@ -785,7 +785,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
                     
                     Tcl_AppendResult (interp, "undefined variable `", 
                             var_p->string,
-                            "'", NULL);
+                            "'", (char*)0L);
 
                     Ns_OracleFlush(dbh);
                     string_list_free_list(bind_variables);
@@ -842,7 +842,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
 
     if (retbuf == NULL) {
         Tcl_AppendResult(interp, "return variable '", retvar, 
-                "' not found in statement bind variables", NULL);
+                "' not found in statement bind variables", (char*)0L);
         Ns_OracleFlush (dbh);
         string_list_free_list(bind_variables);
 
@@ -866,7 +866,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
       
-    Tcl_AppendResult (interp, retbuf, NULL);
+    Tcl_AppendResult (interp, retbuf, (char*)0L);
       
     /* Check to see if return variable was a Tcl variable */
       
@@ -953,7 +953,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
         argv_base = 5;
         set = Ns_TclGetSet(interp, Tcl_GetString(objv[4]));
         if (set == NULL) {
-            Tcl_AppendResult(interp, "invalid set id `", Tcl_GetString(objv[4]), "'", NULL);
+            Tcl_AppendResult(interp, "invalid set id `", Tcl_GetString(objv[4]), "'", (char*)0L);
             return TCL_ERROR;
         }
     } else {
@@ -965,7 +965,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
-                "by the Oracle driver", NULL);
+                "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -1001,7 +1001,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
 
         default:
             error(lexpos(), "internal error");
-            Tcl_AppendResult(interp, "internal error", NULL);
+            Tcl_AppendResult(interp, "internal error", (char*)0L);
             return TCL_ERROR;
     }
 
@@ -1140,11 +1140,11 @@ OracleSelect (Tcl_Interp *interp, int objc,
                             "invalid positional variable `:",
                             var_p->string,
                             "', valid values start with 1",
-                            NULL);
+                            (char*)0L);
                 } else {
                     Tcl_AppendResult(interp,
                             "not enough arguments for positional variable ':",
-                            var_p->string, "'", NULL);
+                            var_p->string, "'", (char*)0L);
                 }
 
                 Ns_OracleFlush(dbh);
@@ -1164,7 +1164,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
 
                 if (value == NULL) {
                     Tcl_AppendResult(interp, "undefined variable `",
-                            var_p->string, "'", NULL);
+                            var_p->string, "'", (char*)0L);
                     Ns_OracleFlush(dbh);
                     string_list_free_list(bind_variables);
                     return TCL_ERROR;
@@ -1178,7 +1178,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
 
                 if (value == NULL) {
                     Tcl_AppendResult(interp, "undefined set element `",
-                            var_p->string, "'", NULL);
+                            var_p->string, "'", (char*)0L);
                     Ns_OracleFlush(dbh);
                     string_list_free_list(bind_variables);
                     return TCL_ERROR;
@@ -1215,7 +1215,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                 if ((int) iters != fetchbuf->array_count) {
                     Tcl_AppendResult(interp,
                                      "non-matching numbers of rows",
-                                     NULL);
+                                     (char*)0L);
                     Ns_OracleFlush(dbh);
                     string_list_free_list(bind_variables);
                     return TCL_ERROR;
@@ -1527,7 +1527,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
-                         "by the Oracle driver", NULL);
+                         "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -1560,7 +1560,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
         for (i = 0; i < connection->n_columns; i++) {
             if (access(Tcl_GetString(data[i]), R_OK) != 0) {
                 Tcl_AppendResult(interp, "could not access file", 
-                        Tcl_GetString(data[i]), NULL);
+                        Tcl_GetString(data[i]), (char*)0L);
                 Ns_OracleFlush(dbh);
                 return TCL_ERROR;
             }
@@ -1733,7 +1733,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
-                         "by the Oracle driver", NULL);
+                         "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -1792,11 +1792,11 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
                     Tcl_AppendResult(interp,
                                      "invalid positional variable `:",
                                      var_p->string,
-                                     "', valid values start with 1", NULL);
+                                     "', valid values start with 1", (char*)0L);
                 } else {
                     Tcl_AppendResult(interp,
                                      "not enough arguments for positional variable ':",
-                                     var_p->string, "'", NULL);
+                                     var_p->string, "'", (char*)0L);
                 }
                 Ns_OracleFlush(dbh);
                 string_list_free_list(bind_variables);
@@ -1808,7 +1808,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
             value = Tcl_GetVar(interp, var_p->string, 0);
             if (value == NULL) {
                 Tcl_AppendResult(interp, "undefined variable `",
-                                 var_p->string, "'", NULL);
+                                 var_p->string, "'", (char*)0L);
                 Ns_OracleFlush(dbh);
                 string_list_free_list(bind_variables);
                 Tcl_Free((char *) lob_argv);
@@ -2023,7 +2023,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
                              "wrong number of args: should be '",
                              Tcl_GetString(objv[0]), 
                              subcommand, " dbId query ?nbytes?",
-                             NULL);
+                             (char*)0L);
             goto write_lob_cleanup;
         }
 
@@ -2038,7 +2038,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
                              "wrong number of args: should be '",
                              Tcl_GetString(objv[0]), 
                              subcommand, " dbId query filename",
-                             NULL);
+                             (char*)0L);
             goto write_lob_cleanup;
         }
     }
@@ -2050,7 +2050,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
         Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
-                         "by the Oracle driver", NULL);
+                         "by the Oracle driver", (char*)0L);
         goto write_lob_cleanup;
     }
 
@@ -2169,7 +2169,7 @@ OracleGetCols (Tcl_Interp *interp, int objc,
 
     if (objc < 4) {
         Tcl_AppendResult(interp, "wrong number of args: should be `",
-                         Tcl_GetString(objv[0]), " getcols dbId sql'", NULL);
+                         Tcl_GetString(objv[0]), " getcols dbId sql'", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -2300,7 +2300,7 @@ OracleResultRows (Tcl_Interp *interp, int objc,
 
     connection = dbh->connection;
     if (connection->stmt == 0) {
-        Tcl_AppendResult(interp, "no active statement", NULL);
+        Tcl_AppendResult(interp, "no active statement", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -2315,7 +2315,7 @@ OracleResultRows (Tcl_Interp *interp, int objc,
     }
 
     snprintf(buf, 1024, "%ld", (long) count);
-    Tcl_AppendResult(interp, buf, NULL);
+    Tcl_AppendResult(interp, buf, (char*)0L);
 
     return TCL_OK;
 }
@@ -4443,7 +4443,7 @@ tcl_error_p(const char *file, int line, const char *fn,
 
     Ns_Log(Error, "SQL(): %s", buf);
 
-    Tcl_AppendResult(interp, buf, NULL);
+    Tcl_AppendResult(interp, buf, (char*)0L);
 
     /* error */
     Ns_Free(msgbuf);
@@ -4854,7 +4854,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                lexpos(), path, errno, strerror(errno));
         Tcl_AppendResult(interp, "can't open file ", path,
                          " for reading. ", "received error ",
-                         strerror(errno), NULL);
+                         strerror(errno), (char*)0L);
         goto bailout;
     }
 
@@ -4862,7 +4862,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
         Ns_Log(Error, "%s:%d:%s Error statting %s: %d(%s)",
                lexpos(), path, errno, strerror(errno));
         Tcl_AppendResult(interp, "can't stat ", path, ". ",
-                         "received error ", strerror(errno), NULL);
+                         "received error ", strerror(errno), (char*)0L);
         goto bailout;
     }
     filelen = statbuf.st_size;
@@ -4893,7 +4893,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
         Ns_Log(Error, "%s:%d:%s Error reading file %s: %d(%s)",
                lexpos(), path, errno, strerror(errno));
         Tcl_AppendResult(interp, "can't read ", path,
-                         " received error ", strerror(errno), NULL);
+                         " received error ", strerror(errno), (char*)0L);
         goto bailout;
     }
 
@@ -4951,7 +4951,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                        lexpos(), path, errno, strerror(errno));
                 Tcl_AppendResult(interp, "can't read ", path,
                                  " received error ", strerror(errno),
-                                 NULL);
+                                 (char*)0L);
                 piece = OCI_LAST_PIECE;
             }
 
@@ -5066,7 +5066,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
         if (conn == NULL) {
             Ns_Log(Error, "%s:%d:%s: No AOLserver conn available",
                    lexpos());
-            Tcl_AppendResult(interp, "No AOLserver conn available", NULL);
+            Tcl_AppendResult(interp, "No AOLserver conn available", (char*)0L);
             goto bailout;
         }
     } else {
@@ -5079,7 +5079,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                    lexpos(), path, errno, strerror(errno));
             Tcl_AppendResult(interp, "can't open file ", path,
                              " for writing. ", "received error ",
-                             strerror(errno), NULL);
+                             strerror(errno), (char*)0L);
             goto bailout;
         }
     }
@@ -5123,7 +5123,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                        lexpos(), path, errno, strerror(errno));
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
-                                 NULL);
+                                 (char*)0L);
                 goto bailout;
             } else {
                 Ns_Log(Error,
@@ -5131,7 +5131,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                        lexpos(), path, bytes_written, loblen);
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
-                                 NULL);
+                                 (char*)0L);
                 goto bailout;
             }
         }
@@ -5158,7 +5158,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                        lexpos(), path, errno, strerror(errno));
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
-                                 NULL);
+                                 (char*)0L);
                 goto bailout;
             } else {
                 Ns_Log(Error,
@@ -5166,7 +5166,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                        lexpos(), path, bytes_written, lob_buffer_size);
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
-                                 NULL);
+                                 (char*)0L);
                 goto bailout;
             }
         }
@@ -5223,7 +5223,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                         Tcl_AppendResult(interp, "can't write ", path,
                                          " for writing. ",
                                          " received error ",
-                                         strerror(errno), NULL);
+                                         strerror(errno), (char*)0L);
                     } else {
                         Ns_Log(Error,
                                "%s:%d:%s error writing %s.  incomplete write of %d out of %d",
@@ -5232,7 +5232,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                         Tcl_AppendResult(interp, "can't write ", path,
                                          " for writing. ",
                                          " received error ",
-                                         strerror(errno), NULL);
+                                         strerror(errno), (char*)0L);
                     }
                 }
                 goto bailout;
@@ -5643,7 +5643,7 @@ ora_get_column_index(Tcl_Interp * interp, Ns_DbTableInfo * tinfo,
 
         Tcl_AppendResult(interp, buffer, " is an invalid column "
                          "index.  ", tinfo->table->name, " only has ",
-                         buffer, " columns", NULL);
+                         buffer, " columns", (char*)0L);
         goto bailout;
     }
 
@@ -5667,7 +5667,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
 
     if (argc < 4) {
         Tcl_AppendResult(interp, "wrong # args:  should be \"",
-                         argv[0], " command dbId table ?args?\"", NULL);
+                         argv[0], " command dbId table ?args?\"", (char*)0L);
         goto bailout;
     }
 
@@ -5679,14 +5679,14 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
     tinfo = ora_get_table_info(handle, argv[3]);
     if (tinfo == NULL) {
         Tcl_AppendResult(interp, "could not get table info for "
-                         "table ", argv[3], NULL);
+                         "table ", argv[3], (char*)0L);
         goto bailout;
     }
 
     if (!strcmp(argv[1], "count")) {
         if (argc != 4) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
-                             argv[0], " ", argv[1], " dbId table\"", NULL);
+                             argv[0], " ", argv[1], " dbId table\"", (char*)0L);
             goto bailout;
         }
         Tcl_SetObjResult(interp, Tcl_NewIntObj(tinfo->ncolumns));
@@ -5695,7 +5695,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (argc != 5) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
                              argv[0], " ", argv[1],
-                             " dbId table column\"", NULL);
+                             " dbId table column\"", (char*)0L);
             goto bailout;
         }
         colindex = Ns_DbColumnIndex(tinfo, argv[4]);
@@ -5708,7 +5708,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (argc != 5) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
                              argv[0], " ", argv[1],
-                             " dbId table column\"", NULL);
+                             " dbId table column\"", (char*)0L);
             goto bailout;
         }
         if (ora_get_column_index(interp, tinfo, argv[4], &colindex)
@@ -5721,7 +5721,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (argc != 5) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
                              argv[0], " ", argv[1],
-                             " dbId table column\"", NULL);
+                             " dbId table column\"", (char*)0L);
             goto bailout;
         }
         colindex = Ns_DbColumnIndex(tinfo, argv[4]);
@@ -5736,7 +5736,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (argc != 5) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
                              argv[0], " ", argv[1],
-                             " dbId table column\"", NULL);
+                             " dbId table column\"", (char*)0L);
             goto bailout;
         }
         if (ora_get_column_index(interp, tinfo, argv[4], &colindex)
@@ -5754,19 +5754,19 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
     } else if (!strcmp(argv[1], "value")) {
         /* not used in ACS AFAIK */
         Tcl_AppendResult(interp, argv[1], " value is not implemented.",
-                         NULL);
+                         (char*)0L);
         goto bailout;
 
     } else if (!strcmp(argv[1], "valuebyindex")) {
         /* not used in ACS AFAIK */
         Tcl_AppendResult(interp, argv[1],
-                         " valuebyindex is not implemented.", NULL);
+                         " valuebyindex is not implemented.", (char*)0L);
         goto bailout;
     } else {
         Tcl_AppendResult(interp, "unknown command \"", argv[1],
                          "\": should be count, exists, name, "
                          "type, typebyindex, value, or "
-                         "valuebyindex", NULL);
+                         "valuebyindex", (char*)0L);
         goto bailout;
     }
 
@@ -5793,7 +5793,7 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
 
     if (argc < 3) {
         Tcl_AppendResult(interp, "wrong # args:  should be \"",
-                         argv[0], " command dbId ?args?\"", NULL);
+                         argv[0], " command dbId ?args?\"", (char*)0L);
         goto bailout;
     }
 
@@ -5804,14 +5804,14 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
     if (!strcmp(argv[1], "bestrowid")) {
         /* not used in ACS AFAIK */
         Tcl_AppendResult(interp, argv[1], " bestrowid is not implemented.",
-                         NULL);
+                         (char*)0L);
         goto bailout;
     } else if (!strcmp(argv[1], "exists")) {
         int exists_p = 0;
 
         if (argc != 4) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
-                             argv[0], " ", argv[1], "dbId table\"", NULL);
+                             argv[0], " ", argv[1], "dbId table\"", (char*)0L);
             goto bailout;
         }
 
@@ -5845,7 +5845,7 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
 
         if (argc != 3) {
             Tcl_AppendResult(interp, "wrong # of args: should be \"",
-                             argv[0], " ", argv[1], "dbId\"", NULL);
+                             argv[0], " ", argv[1], "dbId\"", (char*)0L);
             goto bailout;
         }
 
@@ -5870,13 +5870,13 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
     } else if (!strcmp(argv[1], "value")) {
         /* not used in ACS AFAIK */
         Tcl_AppendResult(interp, argv[1], " value is not implemented.",
-                         NULL);
+                         (char*)0L);
         goto bailout;
 
     } else {
         Tcl_AppendResult(interp, "unknown command \"", argv[1],
                          "\": should be bestrowid, exists, list, "
-                         "listall, or value", NULL);
+                         "listall, or value", (char*)0L);
         goto bailout;
     }
 
