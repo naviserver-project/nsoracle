@@ -1025,7 +1025,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    /* Check what type of statment it is, this will affect how
+    /* Check what type of statement it is, this will affect how
      * many times we expect to execute it.
      */
     oci_status = OCIAttrGet(connection->stmt,
@@ -2729,7 +2729,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
 /* Entry point (called by AOLserver when driver loaded) 
 
    note that this does not leave behind any structures or state outside
-   of reading the configuraton parameters, as well as
+   of reading the configuration parameters, as well as
    initializing OCI and registering our functions
 */
 NS_EXPORT int 
@@ -3202,7 +3202,7 @@ Ns_OracleExec (Ns_DbHandle *dbh, char *sql)
         return NS_ERROR;
     }
 
-    /* check what type of statment it is, this will affect how
+    /* check what type of statement it is, this will affect how
        many times we expect to execute it */
     oci_status = OCIAttrGet(connection->stmt,
                             OCI_HTYPE_STMT,
@@ -4114,7 +4114,7 @@ nilp(CONST char *s)
 /*}}}*/
 
 /*
- * Several helper funtions that get used everywhere.
+ * Several helper functions that get used everywhere.
  */
 
 #ifdef FOR_CASSANDRACLE
@@ -4122,7 +4122,7 @@ nilp(CONST char *s)
 
 /* 
  * Because Cassandracle (http://www.arsdigita.com/free-tools/cassandracle.html)
- * runs with DBA priviliges, we need to prevent anything
+ * runs with DBA privileges, we need to prevent anything
  * Bad from happening, whether through malicious intent or just plain
  * human sloppiness.  Selects are pretty safe, so only those are allowed
  * if FOR_CASSANDRACLE is defined, disallow any sql that does not
@@ -4299,7 +4299,7 @@ oci_error_p(const char *file, int line, const char *fn,
     }
 
     if (((errorcode == 900) || (offset > 0)) && (strlen(query) >= offset)) {
-        /* ora-00900 is invalid sql statment
+        /* ora-00900 is invalid sql statement
          *           it seems to be the msg most likely to be a parse
          *           error that sets offset to 0
          */
