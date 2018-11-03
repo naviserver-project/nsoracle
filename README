@@ -42,7 +42,7 @@ NaviServer Hints:
      export ORACLE_HOME=/usr/local/src/oracle/instantclient_11_2/
 
      # includes: under $ORACLE_HOME/sdk/include/
-     # libaries: $ORACLE_HOME/lib/
+     # libraries: $ORACLE_HOME/lib/
 
   To build and install the binary under naviserver, use e.g.
 
