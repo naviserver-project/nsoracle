@@ -2732,7 +2732,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
    of reading the configuration parameters, as well as
    initializing OCI and registering our functions
 */
-NS_EXPORT int
+NS_EXPORT Ns_ReturnCode
 Ns_DbDriverInit (const char *hdriver, const char *config_path)
 {
     int ns_status;

@@ -198,7 +198,7 @@ static Ns_Set *Oracle0or1Row(Tcl_Interp *interp,
 static sb4     ora_append_buf_to_dstring(dvoid * ctxp, CONST dvoid * bufp,
                                          ub4 len, ub1 piece);
 
-NS_EXPORT int Ns_DbDriverInit(char *hdriver, char *config_path);
+NS_EXPORT Ns_ReturnCode Ns_DbDriverInit(const char *hdriver, const char *config_path);
 
 #if defined(NS_AOLSERVER_3_PLUS)
 Tcl_CmdProc 
