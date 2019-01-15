@@ -309,7 +309,7 @@ void OracleDescribeArguments (OCIDescribe *descHandlePtr,
         Ns_DbHandle *dbh, Tcl_Interp *interp, Tcl_Obj *list);
 
 /* Config parameter control */
-static int debug_p = NS_FALSE;  
+static bool debug_p = NS_FALSE;  
 static int max_string_log_length = 0;
 static int lob_buffer_size = 16384;
 static int char_expansion;
