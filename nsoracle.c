@@ -2955,7 +2955,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     /* tell OCI to associate the server handle with the context handle */
     oci_status = OCIAttrSet(connection->svc,
                             OCI_HTYPE_SVCCTX,
-                            connection->srv,
+                            (void *)connection->srv,
                             0, OCI_ATTR_SERVER, connection->err);
     if (oci_error_p(lexpos(), dbh, "OCIAttrSet", 0, oci_status))
         return NS_ERROR;
@@ -2970,7 +2970,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     /* give OCI the username from the nsd.ini file */
     oci_status = OCIAttrSet(connection->auth,
                             OCI_HTYPE_SESSION,
-                            dbh->user,
+                            (void *)dbh->user,
                             strlen(dbh->user),
                             OCI_ATTR_USERNAME, connection->err);
     if (oci_error_p(lexpos(), dbh, "OCIAttrSet", 0, oci_status))
@@ -2979,7 +2979,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     /* give OCI the password from the nsd.ini file */
     oci_status = OCIAttrSet(connection->auth,
                             OCI_HTYPE_SESSION,
-                            dbh->password,
+                            (void *)dbh->password,
                             strlen(dbh->password),
                             OCI_ATTR_PASSWORD, connection->err);
     if (oci_error_p(lexpos(), dbh, "OCIAttrSet", 0, oci_status))
