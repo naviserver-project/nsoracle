@@ -1,4 +1,3 @@
-/* $Id$ */
 
 #define NSORACLE_VERSION       "2.8a2"
 
@@ -12,7 +11,7 @@
 #define BIND_IN                2
 
 /* Default values for the configuration parameters */
-#define DEFAULT_DEBUG  			NS_FALSE
+#define DEFAULT_DEBUG			NS_FALSE
 #define DEFAULT_MAX_STRING_LOG_LENGTH	1024
 #define DEFAULT_CHAR_EXPANSION          1
 
@@ -47,11 +46,11 @@ NS_EXPORT int Ns_ModuleVersion = 1;
 static char *ora_driver_version = "Oracle Driver version " NSORACLE_VERSION;
 static char *ora_driver_name = "Oracle8";
 
-/*  
- *  The OCI lumps a bunch of different things into two C types, sword 
+/*
+ *  The OCI lumps a bunch of different things into two C types, sword
  *  (signed word, i.e., an int) and dvoid (pointer to void; something we
  *  only give back to them anyway).  We give them semantically meaningful
- *  names 
+ *  names
  *
  */
 
@@ -61,12 +60,12 @@ typedef dvoid oci_attribute_t;
 typedef dvoid oci_param_t;
 typedef dvoid oci_descriptor_t;
 
-typedef int (OracleCmdProc) (Tcl_Interp *interp, int objc, 
-        struct Tcl_Obj * CONST * objv, Ns_DbHandle *dbh);
+typedef int (OracleCmdProc) (Tcl_Interp *interp, int objc,
+	struct Tcl_Obj * CONST * objv, Ns_DbHandle *dbh);
 
 Tcl_ObjCmdProc OracleObjCmd;
 
-OracleCmdProc 
+OracleCmdProc
     OraclePLSQL,
     OracleExecPLSQL,
     OracleExecPLSQLBind,
@@ -78,9 +77,9 @@ OracleCmdProc
     OracleDesc,
     OracleGetCols;
 
-/* When we start a query, we allocate one fetch buffer for each 
+/* When we start a query, we allocate one fetch buffer for each
  * column that we're querying, i.e., if you say "select foo,bar from yow"
- * then two fetch buffers will be allocated 
+ * then two fetch buffers will be allocated
  */
 struct fetch_buffer {
     struct ora_connection *connection;
@@ -111,7 +110,7 @@ struct fetch_buffer {
     char *name;
 
     /* Used for dynamic binds. */
-    int   inout; 
+    int   inout;
 
     /* support for array DML: the array of values for this bind variable. */
     int array_count;
@@ -126,8 +125,8 @@ struct fetch_buffer {
     /* these are only used for LONGs; the length of one piece */
     ub4 piecewise_fetch_length;
 
-    /* in order to implement the clob_dml API call, we need 1 LOB 
-       for every row/column intersection inserted.  I.e., if we do an 
+    /* in order to implement the clob_dml API call, we need 1 LOB
+       for every row/column intersection inserted.  I.e., if we do an
        insert that results in 4 rows going into the db, with 3 CLOB
        columns then we need 12 LOBs.  This struct is for one column only
        so we just need one array of lobs. */
@@ -142,8 +141,8 @@ struct fetch_buffer {
 
 typedef struct fetch_buffer fetch_buffer_t;
 
-/* this is our own data structure for keeping track 
-   of an Oracle connection 
+/* this is our own data structure for keeping track
+   of an Oracle connection
 */
 
 struct ora_connection {
@@ -157,13 +156,13 @@ struct ora_connection {
     OCISession *auth;
     OCIStmt    *stmt;
 
-    /* The default is autocommit; we keep track of when a connection 
+    /* The default is autocommit; we keep track of when a connection
      * has been kicked into transaction mode.  This was to make Oracle
      * look more like ANSI databases such as Illustra.
      */
     enum {
-        autocommit,
-        transaction
+	autocommit,
+	transaction
     } mode;
 
     /* Fetch buffers; these change per query */
@@ -189,25 +188,25 @@ static int     Ns_OracleExec(Ns_DbHandle *dbh, char *sql);
 static int     Ns_OracleGetRow(Ns_DbHandle *dbh, Ns_Set * row);
 static int     Ns_OracleFlush(Ns_DbHandle *dbh);
 static int     Ns_OracleResetHandle(Ns_DbHandle * dbh);
-static int     Ns_OracleServerInit(char *hserver, char *hmodule, 
-                                   char *hdriver);
+static int     Ns_OracleServerInit(char *hserver, char *hmodule,
+				   char *hdriver);
 
-static Ns_Set *Oracle0or1Row(Tcl_Interp *interp, 
-                             Ns_DbHandle *handle, Ns_Set *row, int *nrows);
+static Ns_Set *Oracle0or1Row(Tcl_Interp *interp,
+			     Ns_DbHandle *handle, Ns_Set *row, int *nrows);
 
 static sb4     ora_append_buf_to_dstring(dvoid * ctxp, CONST dvoid * bufp,
-                                         ub4 len, ub1 piece);
+					 ub4 len, ub1 piece);
 
 NS_EXPORT Ns_ReturnCode Ns_DbDriverInit(const char *hdriver, const char *config_path);
 
 #if defined(NS_AOLSERVER_3_PLUS)
-Tcl_CmdProc 
+Tcl_CmdProc
     ora_column_command,
-    ora_table_command;      
+    ora_table_command;
 
 static Ns_DbTableInfo *ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table);
-static char *ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, 
-                            int system_tables_p);
+static char *ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh,
+			    int system_tables_p);
 static      Ns_DbTableInfo *Ns_DbNewTableInfo(CONST84 char *table);
 static void Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo);
 static void Ns_DbAddColumnInfo(Ns_DbTableInfo * tinfo, Ns_Set * column_info);
@@ -215,10 +214,10 @@ static int  Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name);
 
 #else
 static char *ora_best_row_id(Ns_DString * pds, Ns_DbHandle * dbh,
-                             char *table);
+			     char *table);
 #endif
 
-/*  lexpos is used for logging errors, macro that expands into something like 
+/*  lexpos is used for logging errors, macro that expands into something like
  *  ora8.c:345:Ns_DbDriverInit: entry (hdriver 149f60, config_path ns/db/driver/ora8)
  */
 
@@ -246,20 +245,20 @@ enum {
 static void ns_ora_log(const char *file, int line, const char *fn, char *fmt, ...);
 static void error(const char *file, int line, const char *fn, char *fmt, ...);
 static int oci_error_p(const char *file, int line, const char *fn,
-                       Ns_DbHandle * dbh, char *ocifn, CONST char *query,
-                       oci_status_t oci_status);
+		       Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+		       oci_status_t oci_status);
 static int tcl_error_p(const char *file, int line, const char *fn, Tcl_Interp * interp,
-        Ns_DbHandle * dbh, char *ocifn, CONST char *query,
-        oci_status_t oci_status);
+	Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+	oci_status_t oci_status);
 static void downcase(char *s);
 static CONST char *nilp(CONST char *s);
 static int stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh,
-                            int rowind, OCILobLocator * lobl, char *path,
-                            int to_conn_p, OCISvcCtx * svchp,
-                            OCIError * errhp);
+			    int rowind, OCILobLocator * lobl, char *path,
+			    int to_conn_p, OCISvcCtx * svchp,
+			    OCIError * errhp);
 static int stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh,
-                           int rowind, OCILobLocator * lobl, char *path,
-                           ora_connection_t * connection);
+			   int rowind, OCILobLocator * lobl, char *path,
+			   ora_connection_t * connection);
 
 static string_list_elt_t * parse_bind_variables(char *input);
 static void string_list_free_list(string_list_elt_t * head);
@@ -272,18 +271,18 @@ static int handle_builtins(Ns_DbHandle * dbh, char *sql);
 
 /* Oracle Callbacks used in array dml and clob/blobs. */
 static sb4 list_element_put_data(dvoid * ictxp,
-                      OCIBind * bindp,
-                      ub4 iter,
-                      ub4 index,
-                      dvoid ** bufpp,
-                      ub4 * alenp, ub1 * piecep, dvoid ** indpp);
+		      OCIBind * bindp,
+		      ub4 iter,
+		      ub4 index,
+		      dvoid ** bufpp,
+		      ub4 * alenp, ub1 * piecep, dvoid ** indpp);
 static sb4 no_data(dvoid * ctxp, OCIBind * bindp,
-        ub4 iter, ub4 index, dvoid ** bufpp, ub4 * alenpp, ub1 * piecep,
-        dvoid ** indpp);
+	ub4 iter, ub4 index, dvoid ** bufpp, ub4 * alenpp, ub1 * piecep,
+	dvoid ** indpp);
 
 static sb4 get_data(dvoid * ctxp, OCIBind * bindp,
-         ub4 iter, ub4 index, dvoid ** bufpp, ub4 ** alenp, ub1 * piecep,
-         dvoid ** indpp, ub2 ** rcodepp);
+	 ub4 iter, ub4 index, dvoid ** bufpp, ub4 ** alenp, ub1 * piecep,
+	 dvoid ** indpp, ub2 ** rcodepp);
 
 #ifdef FOR_CASSANDRACLE
 static int allow_sql_p(Ns_DbHandle * dbh, char *sql, int display_sql_p);
@@ -296,20 +295,20 @@ static int snprintf(char *buf, int len, const char *fmt, ...)
 #endif
 
 
-void OracleDescribeSynonym (OCIDescribe *descHandlePtr, 
-        OCIParam *paramHandlePtr, ora_connection_t *connection, 
-        Ns_DbHandle *dbh, Tcl_Interp *interp );
+void OracleDescribeSynonym (OCIDescribe *descHandlePtr,
+	OCIParam *paramHandlePtr, ora_connection_t *connection,
+	Ns_DbHandle *dbh, Tcl_Interp *interp );
 
-void OracleDescribePackage (OCIDescribe *descHandlePtr, 
-        OCIParam *paramHandlePtr, ora_connection_t *connection, 
-        Ns_DbHandle *dbh, char *package, Tcl_Interp *interp );
+void OracleDescribePackage (OCIDescribe *descHandlePtr,
+	OCIParam *paramHandlePtr, ora_connection_t *connection,
+	Ns_DbHandle *dbh, char *package, Tcl_Interp *interp );
 
-void OracleDescribeArguments (OCIDescribe *descHandlePtr, 
-        OCIParam *paramHandlePtr, ora_connection_t *connection, 
-        Ns_DbHandle *dbh, Tcl_Interp *interp, Tcl_Obj *list);
+void OracleDescribeArguments (OCIDescribe *descHandlePtr,
+	OCIParam *paramHandlePtr, ora_connection_t *connection,
+	Ns_DbHandle *dbh, Tcl_Interp *interp, Tcl_Obj *list);
 
 /* Config parameter control */
-static bool debug_p = NS_FALSE;  
+static bool debug_p = NS_FALSE;
 static int max_string_log_length = 0;
 static int lob_buffer_size = 16384;
 static int char_expansion;
@@ -346,4 +345,3 @@ static Ns_DbProc ora_procs[] = {
 #else
 #define EXTRA_OPEN_FLAGS 0
 #endif
-
