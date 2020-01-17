@@ -73,6 +73,10 @@ CFLAGS += -I$(ORACLE_HOME)/sdk/include \
     -I$(ORACLE_HOME)/rdbms/demo -I$(ORACLE_HOME)/rdbms/public \
     -I$(ORACLE_HOME)/network/public -I$(ORACLE_HOME)/plsql/public
 
+ifdef ORA_CFLAGS
+   CFLAGS += $(ORA_CFLAGS)
+endif
+
 include $(NSHOME)/include/Makefile.module
 
 LD_LIBRARY_PATH	= LD_LIBRARY_PATH="./:$$LD_LIBRARY_PATH"
