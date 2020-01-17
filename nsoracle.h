@@ -15,14 +15,16 @@
 #define DEFAULT_MAX_STRING_LOG_LENGTH	1024
 #define DEFAULT_CHAR_EXPANSION          1
 
+#include <ns.h>
 #include <oci.h>
+#if 0
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <ns.h>
+#endif
 
 #if defined(NS_VERSION)
 # define NS_AOLSERVER_3_PLUS 1
