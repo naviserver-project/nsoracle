@@ -3954,23 +3954,7 @@ Ns_OracleResetHandle (Ns_DbHandle *dbh)
  *
  */
 
-/*{{{ snprintf (WIN32) */
-#ifdef WIN32
-/*
- * This is a GNU extension that isn't present on Windows.
- */
-static int snprintf(char *buf, int len, const char *fmt, ...)
-{
-    va_list ap;
-    int cc;
-
-    va_start(ap, fmt);
-    cc = vsprintf(buf, fmt, ap);
-    va_end(ap);
-    return cc;
-}
-#endif
-/*}}}*/
+/* NaviServer includes snprintf() as ns_snprintf() in "naviserver/nsthread/error.c". */
 
 /*{{{ string_list_elt_t */
 static string_list_elt_t *

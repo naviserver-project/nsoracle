@@ -292,8 +292,9 @@ static int allow_sql_p(Ns_DbHandle * dbh, char *sql, int display_sql_p);
 #define allow_sql_p(a,b,c) NS_TRUE
 #endif
 
-#ifdef WIN32
-static int snprintf(char *buf, int len, const char *fmt, ...)
+/* Same approach as in "naviserver/include/nsthread.h": */
+#if _MSC_VER < 1900
+#define snprintf  ns_snprintf
 #endif
 
 
@@ -320,24 +321,24 @@ static int prefetch_rows = 0;
 static int prefetch_memory = 0;
 
 static Ns_DbProc ora_procs[] = {
-    {DbFn_Name,         (Ns_Callback *) Ns_OracleName},
-    {DbFn_DbType,       (Ns_Callback *) Ns_OracleDbType},
-    {DbFn_OpenDb,       (Ns_Callback *) Ns_OracleOpenDb},
-    {DbFn_CloseDb,      (Ns_Callback *) Ns_OracleCloseDb},
-    {DbFn_DML,          (Ns_Callback *) Ns_OracleDML},
-    {DbFn_Select,       (Ns_Callback *) Ns_OracleSelect},
-    {DbFn_Exec,         (Ns_Callback *) Ns_OracleExec},
-    {DbFn_BindRow,      (Ns_Callback *) Ns_OracleBindRow},
-    {DbFn_GetRow,       (Ns_Callback *) Ns_OracleGetRow},
-    {DbFn_Flush,        (Ns_Callback *) Ns_OracleFlush},
-    {DbFn_Cancel,       (Ns_Callback *) Ns_OracleFlush},
-    {DbFn_ServerInit,   (Ns_Callback *) Ns_OracleServerInit},
-    {DbFn_ResetHandle,  (Ns_Callback *) Ns_OracleResetHandle},
+    {DbFn_Name,         (ns_funcptr_t) Ns_OracleName},
+    {DbFn_DbType,       (ns_funcptr_t) Ns_OracleDbType},
+    {DbFn_OpenDb,       (ns_funcptr_t) Ns_OracleOpenDb},
+    {DbFn_CloseDb,      (ns_funcptr_t) Ns_OracleCloseDb},
+    {DbFn_DML,          (ns_funcptr_t) Ns_OracleDML},
+    {DbFn_Select,       (ns_funcptr_t) Ns_OracleSelect},
+    {DbFn_Exec,         (ns_funcptr_t) Ns_OracleExec},
+    {DbFn_BindRow,      (ns_funcptr_t) Ns_OracleBindRow},
+    {DbFn_GetRow,       (ns_funcptr_t) Ns_OracleGetRow},
+    {DbFn_Flush,        (ns_funcptr_t) Ns_OracleFlush},
+    {DbFn_Cancel,       (ns_funcptr_t) Ns_OracleFlush},
+    {DbFn_ServerInit,   (ns_funcptr_t) Ns_OracleServerInit},
+    {DbFn_ResetHandle,  (ns_funcptr_t) Ns_OracleResetHandle},
 #if !defined(NS_AOLSERVER_3_PLUS)
     /* These aren't supported in AOLserver 3 */
-    {DbFn_GetTableInfo, (Ns_Callback *) ora_get_table_info},
-    {DbFn_TableList,    (Ns_Callback *) ora_table_list},
-    {DbFn_BestRowId,    (Ns_Callback *) ora_best_row_id},
+    {DbFn_GetTableInfo, (ns_funcptr_t) ora_get_table_info},
+    {DbFn_TableList,    (ns_funcptr_t) ora_table_list},
+    {DbFn_BestRowId,    (ns_funcptr_t) ora_best_row_id},
 #endif
     {0, NULL,}
 };
