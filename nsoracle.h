@@ -45,6 +45,12 @@
 
 NS_EXPORT int Ns_ModuleVersion = 1;
 
+#if defined(_MSC_VER)
+extern NS_IMPORT Ns_LogSeverity Ns_LogSqlDebug;
+#else
+NS_EXTERN Ns_LogSeverity Ns_LogSqlDebug;
+#endif
+
 static char *ora_driver_version = "Oracle Driver version " NSORACLE_VERSION;
 static char *ora_driver_name = "Oracle8";
 

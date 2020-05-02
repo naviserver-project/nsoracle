@@ -1,0 +1,26 @@
+# Emacs mode:  -*-Makefile-*-
+#
+# Windows nmake makefile.  We expect to call this from
+# "../naviserver/Makefile.win32", NOT directly.
+#
+
+ORACLE_HOME = C:\P\oracle\instantclient_19_6
+ora_inc_dir = $(ORACLE_HOME)\sdk\include
+ora_lib_dir = $(ORACLE_HOME)\sdk\lib\msvc
+
+!ifndef NS_DIR
+!ifdef NAVISERVER
+NS_DIR = $(NAVISERVER)
+!else
+NS_DIR = ..\naviserver
+!endif
+!endif
+
+MOD = nsoracle.so
+DLL = nsoracle
+MODOBJS = nsoracle.o
+NS_DB_P=1
+DEFS = /I $(ora_inc_dir)
+LIBS =  /LIBPATH:$(ora_lib_dir) oci.lib
+
+!include "$(NS_DIR)\include\Makefile.win32"
