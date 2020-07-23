@@ -299,7 +299,7 @@ static int allow_sql_p(Ns_DbHandle * dbh, char *sql, int display_sql_p);
 #endif
 
 /* Same approach as in "naviserver/include/nsthread.h": */
-#if _MSC_VER < 1900
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf  ns_snprintf
 #endif
 
