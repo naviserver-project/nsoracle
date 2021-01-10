@@ -1616,7 +1616,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
         ub4 length = -1;
 
         if (files_p) {
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, file name %s", i,
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, filename %s", i,
                    Tcl_GetString(data[i]));
         } else {
             length = strlen(Tcl_GetString(data[i]));
@@ -1902,7 +1902,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
 
 
         if (files_p) {
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, file name %s", i, fetchbuf->buf);
+            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, filename %s", i, fetchbuf->buf);
         } else {
             length = strlen(fetchbuf->buf);
             Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, length %d: %s", i, length,
@@ -3164,7 +3164,7 @@ Ns_OracleExec (Ns_DbHandle *dbh, char *sql)
     /* nuke any previously executing stmt */
     Ns_OracleFlush(dbh);
 
-    /* handle_builtins will flush the handles on a ERROR exit */
+    /* handle_builtins will flush the handles on an ERROR exit */
 
     switch (handle_builtins(dbh, sql)) {
     case NS_DML:
@@ -4299,7 +4299,7 @@ oci_error_p(const char *file, int line, const char *fn,
     }
 
     if (((errorcode == 900) || (offset > 0)) && (strlen(query) >= offset)) {
-        /* ora-00900 is invalid sql statement
+        /* ora-00900 is invalid SQL statement
          *           it seems to be the msg most likely to be a parse
          *           error that sets offset to 0
          */
