@@ -8,7 +8,7 @@
  *  Extended 2000      by markd@arsdigita.com, curtisg@arsdigita.com, jsalz@mit.edu,
  *                        jsc@arsdigita.com, mayoff@arsdigita.com
  *  Extended 2002-2004 by Jeremy Collins <jeremy.collins@tclsource.org>
- *  Extended 2014-2018 by Gustaf Neumann (cleanup, NaviServer adjustments)
+ *  Extended 2014-2022 by Gustaf Neumann (cleanup, NaviServer adjustments)
  */
 
 #include "nsoracle.h"
@@ -2735,7 +2735,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
 NS_EXPORT Ns_ReturnCode
 Ns_DbDriverInit (const char *hdriver, const char *config_path)
 {
-    int ns_status;
+    int ns_status, config_value;
 
     /* slurp any nsd.ini configuration parameters first */
     if (!Ns_ConfigGetBool(config_path, "Debug", &debug_p))
@@ -2751,8 +2751,11 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
     if (!Ns_ConfigGetInt (config_path, "CharExpansion", &char_expansion))
          char_expansion = DEFAULT_CHAR_EXPANSION;
 
-    if (!Ns_ConfigGetInt(config_path, "LobBufferSize", &lob_buffer_size))
+    if (Ns_ConfigGetInt(config_path, "LobBufferSize", &config_value)) {
+        lob_buffer_size = (unsigned int)config_value;
+    } else {
         lob_buffer_size = 16384;
+    }
     Ns_Log(Notice, "%s driver LobBufferSize = %d", hdriver, lob_buffer_size);
 
     if (!Ns_ConfigGetInt(config_path, "PrefetchRows", &prefetch_rows))
@@ -2944,8 +2947,10 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     if (oci_error_p(lexpos(), dbh, "OCIHandleAlloc", 0, oci_status))
         return NS_ERROR;
 
-    /* create association between server handle and access path (datasource;
-       a string from the nsd.ini file) */
+    /*
+     * Create association between server handle and access path (datasource;
+     * a string from the configuration file).
+     */
     oci_status = OCIServerAttach(connection->srv, connection->err,
                                  (const OraText *)dbh->datasource,
                                  (sb4) strlen(dbh->datasource), OCI_DEFAULT);
@@ -5712,9 +5717,8 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (colindex < 0) {
             Tcl_SetResult(interp, NULL, TCL_VOLATILE);
         } else {
-            Tcl_SetResult(interp,
-                          Ns_SetGet(tinfo->columns[colindex], "type"),
-                          TCL_VOLATILE);
+            Tcl_SetObjResult(interp,
+                             Tcl_NewStringObj(Ns_SetGet(tinfo->columns[colindex], "type"), -1));
         }
     } else if (!strcmp(argv[1], "typebyindex")) {
         if (argc != 5) {
@@ -5730,9 +5734,8 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         if (colindex < 0) {
             Tcl_SetResult(interp, NULL, TCL_VOLATILE);
         } else {
-            Tcl_SetResult(interp,
-                          Ns_SetGet(tinfo->columns[colindex], "type"),
-                          TCL_VOLATILE);
+            Tcl_SetObjResult(interp,
+                             Tcl_NewStringObj(Ns_SetGet(tinfo->columns[colindex], "type"), -1));
         }
 
     } else if (!strcmp(argv[1], "value")) {
