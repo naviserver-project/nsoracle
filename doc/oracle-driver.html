@@ -236,8 +236,8 @@ if [catch { ns_db dml $db "begin transaction"
                 # something went wrong
 		# !!! note that this count(*) is picking up the group
 		# !!! inserted inside of the transaction
-                if { [database_to_tcl_string $db "select count(*) from user_gr\
-oups where group_id = $group_id"] > 0 } {
+                if { [database_to_tcl_string $db "select count(*) from\
+                      user_groups where group_id = $group_id"] > 0 } {
                     # group was already in database
                     ns_returnredirect "group.tcl?group_id=$group_id"
 </pre>

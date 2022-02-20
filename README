@@ -1,18 +1,15 @@
+This directory contains release 2.8 of an Oracle driver for
+NaviServer/AOLserver.
 
-This directory contains release 2.7 of an Oracle driver for AOLserver. For
-info, or the latest version, see http://www.arsdigita.com/.
-
-It was written by Cotton Seed (cottons@lcs.mit.edu), later modifications
-by Mark Dalrymple (markd@arsdigita.com), Jin Choi (jsc@arsdigita.com),
-and Rob Mayoff (mayoff@arsdigita.com).
+The driver was originally written by Cotton Seed
+(cottons@lcs.mit.edu), later modifications by Mark Dalrymple
+(markd@arsdigita.com), Jin Choi (jsc@arsdigita.com), Rob Mayoff
+(mayoff@arsdigita.com), Andrew Piskorski and Gustaf Neumann
 
 This Oracle driver is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License, as
 published by the Free Software Foundation; either version 2, or (at your
 option) any later version.
-
-* Be sure to explicitly load the nsdb.so module when running this module under
-* AOLserver 4.x!
 
 How to Build:
 
@@ -22,29 +19,33 @@ How to Build:
 
 * Set ORACLE_HOME in your environment.
 
-* Edit the Makefile and set NSHOME to the location of your AOLserver
+* Edit the Makefile and set NSHOME to the location of your NaviServer/AOLserver
   source or binary tree.
 
 * Run "make" or "gmake" (whichever is GNU Make).
 
 * Run "make install" or copy "nsoracle.so" and "nsoraclecass.so" to your
-  AOLserver bin directory.  "nsoraclecass.so" is the Cassandracle Oracle
+  NaviServer/AOLserver bin directory.  "nsoraclecass.so" is the Cassandracle Oracle
   driver; it only permits SELECT statements.
 
 
 NaviServer Hints:
 
-  Compilation works for Oracle with Oracle client libs 
-  Version 11.2.0.4.0 (instant client package and 
-  instant client package SDK, 64-bit). Point
-  ORACLE_HOME to eg the following path
+  Compilation works for Oracle with Oracle client libs
+  Version 19.3.0.0.0 (instant client package and
+  instant client package SDK, 64-bit). After downloading from e.g.,
+  https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
+  install this library e.g. under /usr/local/src/oracle
+  and set ORACLE_HOME accordingly
 
-     export ORACLE_HOME=/usr/local/src/oracle/instantclient_11_2/
+     export ORACLE_HOME=/usr/local/src/oracle/instantclient_19_8/
+
+  After downloading the client libraries, ORACLE_HOME should include
 
      # includes: under $ORACLE_HOME/sdk/include/
      # libraries: $ORACLE_HOME/lib/
 
-  To build and install the binary under naviserver, use e.g.
+  To build and install the binary under NaviServer, use e.g.
 
      make
      make install
@@ -75,14 +76,9 @@ NOTES:
         when fetched from the database.  Should only be necessary to set this
         if your Oracle is not using UTF-8, in which case a value of 2 should
         work for any ISO-8859 character set.
-   
+
    ns_ora clob_dml SQL is logged when verbose=on in the pool's configuration
    section.
 
    To make a "safe" driver (say for servers running with DBA privileges) that
    only allows SELECT statements, define FOR_CASSANDRACLE when compiling this
-
-
-
-$Header$
-

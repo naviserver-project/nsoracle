@@ -3362,8 +3362,9 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
         /* 512 is large enough because Oracle sends back table_name.column_name and
            neither right now can be larger than 30 chars */
         char name[512];
-        char *name1 = 0;
+        char *name1 = NULL;
         ub4 name1_size = 0;
+        const char *caseLabel;
 
         /* set current fetch buffer */
         fetchbuf = &connection->fetch_buffers[i];
@@ -3411,18 +3412,20 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
             return 0;
         }
 
-        ns_ora_log(lexpos(), "column `%s' type `%d'", name, fetchbuf->type);
+        /* ns_ora_log(lexpos(), "%d: column `%s' type `%d'", i. name, fetchbuf->type);*/
 
         switch (fetchbuf->type) {
             /* we handle LOBs in the loop below */
         case OCI_TYPECODE_CLOB:
         case OCI_TYPECODE_BLOB:
+            caseLabel = "lob";
             break;
 
             /* RDD is Oracle's happy fun name for ROWID (18 chars long
                but if you ask Oracle the usual way, it will give you a
                number that is too small) */
         case SQLT_RDD:
+            caseLabel = "rdd";
             fetchbuf->size = 18;
             fetchbuf->buf_size = fetchbuf->size + 8;
             fetchbuf->buf = Ns_Malloc(fetchbuf->buf_size);
@@ -3434,6 +3437,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                all values out as strings, so we need more space. Empirically,
                it seems to return 41 characters when it does the NUMBER to STRING
                conversion. */
+            caseLabel = "num";
             fetchbuf->size = 81;
             fetchbuf->buf_size = fetchbuf->size + 8;
             fetchbuf->buf = Ns_Malloc(fetchbuf->buf_size);
@@ -3441,18 +3445,42 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
 
             /* this might work if the rest of our LONG stuff worked */
         case SQLT_LNG:
+            caseLabel = "long";
             fetchbuf->buf_size = lob_buffer_size;
             fetchbuf->buf = Ns_Malloc(fetchbuf->buf_size);
             break;
 
         case SQLT_DAT:
-            /* Wayport mod to allow NLS_DATE_FORMAT = YYYY-MM-DD HH24:MI:SS */
-            fetchbuf->size = 20;
+        case SQLT_TIMESTAMP:
+        case SQLT_TIMESTAMP_TZ:
+            if (fetchbuf->type == SQLT_DAT) {
+                /*
+                 * date with format "YYYY-MM-DD HH24:MI:SS",
+                 * 20 bytes
+                 */
+                caseLabel = "date";
+                fetchbuf->size = 20;
+            } else if (fetchbuf->type == SQLT_TIMESTAMP) {
+                /*
+                 * timestamp with format "YYYY-MM-DD HH24:MI:SS.FF6",
+                 * 26 bytes
+                 */
+                caseLabel = "timestamp";
+                fetchbuf->size = 26;
+            } else {
+                /*
+                 * timestamp tz with format "YYYY-MM-DD HH24:MI:SS.FF6 TZH:TZM",
+                 * 33 bytes
+                 */
+               caseLabel = "timestamp tz";
+               fetchbuf->size = 33;
+            }
             fetchbuf->buf_size = fetchbuf->size + 8;
             fetchbuf->buf = Ns_Malloc(fetchbuf->buf_size);
             break;
 
         default:
+            caseLabel = "default";
             /* get the size */
             oci_status = OCIAttrGet(param,
                                     OCI_DTYPE_PARAM,
@@ -3464,7 +3492,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                 return 0;
             }
 
-            ns_ora_log(lexpos(), "column `%s' size `%d'", name, fetchbuf->size);
+            /*ns_ora_log(lexpos(), "column `%s' size `%d'", name, fetchbuf->size);*/
 
             /* this is the important part, we allocate buf to be 8 bytes
                more than Oracle says are necessary (for null
@@ -3482,6 +3510,10 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
 
             break;
         }
+
+        ns_ora_log(lexpos(), "%d: column `%s' type %d size %d (%s)",
+                   i, name, fetchbuf->type, fetchbuf->size, caseLabel);
+
     }
 
     /* loop over the columns again; this could now be in the loop above
