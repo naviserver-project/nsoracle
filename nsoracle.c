@@ -87,10 +87,10 @@ DynamicBindIn(dvoid * ictxp,
  *----------------------------------------------------------------------
  */
 static sb4
-DynamicBindOut (dvoid * ctxp, OCIBind * bindp,
-                ub4 iter, ub4 index, dvoid ** bufpp,
-                ub4 ** alenpp, ub1 * piecep,
-                dvoid ** indpp, ub2 ** rcodepp)
+DynamicBindOut(dvoid * ctxp, OCIBind * bindp,
+               ub4 iter, ub4 index, dvoid ** bufpp,
+               ub4 ** alenpp, ub1 * piecep,
+               dvoid ** indpp, ub2 ** rcodepp)
 {
     fetch_buffer_t   *fetchbuf = (fetch_buffer_t *) ctxp;
 
@@ -114,7 +114,7 @@ DynamicBindOut (dvoid * ctxp, OCIBind * bindp,
 
     fetchbuf->piecewise_fetch_length = fetchbuf->buf_size - fetchbuf->fetch_length;
 
-    ns_ora_log (lexpos (), "%d, %d, %d",
+    ns_ora_log(lexpos(), "%d, %d, %d",
         fetchbuf->buf_size,
         fetchbuf->fetch_length,
         fetchbuf->piecewise_fetch_length);
@@ -143,12 +143,11 @@ DynamicBindOut (dvoid * ctxp, OCIBind * bindp,
  *----------------------------------------------------------------------
  */
 int
-OracleObjCmd (ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[])
+OracleObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const* objv)
 {
     Ns_DbHandle *dbh;
 
-    static CONST char *subcmds[] = {
+    static const char *subcmds[] = {
         "plsql", "exec_plsql", "exec_plsql_bind", "desc", "select",
         "dml", "array_dml", "1row", "0or1row", "getcols", "resultrows",
         "clob_get_file", "blob_get_file",
@@ -296,8 +295,7 @@ OracleObjCmd (ClientData clientData, Tcl_Interp *interp,
  *----------------------------------------------------------------------
  */
 int
-OraclePLSQL (Tcl_Interp *interp, int objc,
-             Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OraclePLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -319,8 +317,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -330,8 +327,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -363,8 +359,9 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
         value = Tcl_GetVar(interp, var_p->string, 0);
         fetchbuf->name = var_p->string;
 
-        if ( (value == NULL) &&
-             (strcmp(var_p->string, ref) != 0) ) {
+        if ((value == NULL)
+            && (strcmp(var_p->string, ref) != 0)
+            ) {
             /* The only time a bind variable can not exist is if its strictly
                an OUT variable, or if its a REF CURSOR.  */
             Tcl_AppendResult(interp, " bind variable :", var_p->string,
@@ -376,7 +373,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
         } else if ( strcmp(var_p->string, ref) == 0 ) {
             /* Handle REF CURSOR */
 
-            if ( refcursor_count == 1 ) {
+            if (refcursor_count == 1) {
                 Tcl_SetResult(interp, " invalid plsql statement, you\
                         can only have a single ref cursors. ", TCL_STATIC);
                 return TCL_ERROR;
@@ -392,8 +389,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                          (oci_handle_t **) &fetchbuf->stmt,
                                          OCI_HTYPE_STMT,
                                          0, NULL);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIHandleAlloc", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIHandleAlloc", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -413,8 +409,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                        &fetchbuf->is_null,
                                        0, 0, 0, 0, OCI_DEFAULT);
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIBindByName", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -423,8 +418,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                 return TCL_ERROR;
             }
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIBindByName", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -459,8 +453,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                        0, 0, 0,
                                        OCI_DATA_AT_EXEC);
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIBindByName", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -474,8 +467,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                         fetchbuf, DynamicBindIn,
                                         fetchbuf, DynamicBindOut);
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIBindByName", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -498,7 +490,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
                                  ? OCI_COMMIT_ON_SUCCESS :
                                  OCI_DEFAULT));
 
-    if (oci_error_p (lexpos (), dbh, "OCIStmtExecute", query, oci_status)) {
+    if (oci_error_p(lexpos(), dbh, "OCIStmtExecute", query, oci_status)) {
         Ns_OracleFlush(dbh);
         free_fetch_buffers(connection);
         return TCL_ERROR;
@@ -524,8 +516,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
 
                     oci_status = OCIHandleFree (connection->stmt,
                                                 OCI_HTYPE_STMT);
-                    if (tcl_error_p
-                        (lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
+                    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
                         Ns_OracleFlush(dbh);
                         free_fetch_buffers(connection);
                         return TCL_ERROR;
@@ -559,8 +550,7 @@ OraclePLSQL (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleExecPLSQL (Tcl_Interp *interp, int objc,
-                 Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleExecPLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     OCIBind           *bind;
     ora_connection_t  *connection;
@@ -570,10 +560,10 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
     /* This indicator variable is a dummy.  We don't actually check the
      * status.  Previously, we set the indp parameter to OCIBindByPos to
      * 0.  Oracle would throw ORA-01405 and we would specifically ignore
-     * it in tcl_error_p.  Now we pass this dummy variable, and Oracle
+     * it in tcl_error_p().  Now we pass this dummy variable, and Oracle
      * returns OCI_SUCCESS whether or not the returned value is NULL.
      * This eliminates the need for explicitly handling ORA-01405 in
-     * tcl_error_p. */
+     * tcl_error_p(). */
 
     sb2               null_indicator = OCI_IND_NULL;
 
@@ -587,8 +577,8 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
     query = Tcl_GetString(objv[3]);
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
-        Tcl_AppendResult (interp, "SQL ", query, " has been rejected "
-                "by the Oracle driver", (char*)0L);
+        Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
+                         "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -598,20 +588,20 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
                                  (oci_handle_t **) &connection->stmt,
                                  OCI_HTYPE_STMT,
                                  0, NULL);
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIHandleAlloc",
-                query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc",
+                    query, oci_status)) {
         Ns_OracleFlush (dbh);
         return TCL_ERROR;
     }
 
-    oci_status = OCIStmtPrepare (connection->stmt,
-                                 connection->err,
-                                 (const OraText *)query,
-                                 (ub4) strlen(query),
-                                 OCI_NTV_SYNTAX,
-                                 OCI_DEFAULT);
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIStmtPrepare",
-                query, oci_status)) {
+    oci_status = OCIStmtPrepare(connection->stmt,
+                                connection->err,
+                                (const OraText *)query,
+                                (ub4) strlen(query),
+                                OCI_NTV_SYNTAX,
+                                OCI_DEFAULT);
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare",
+                    query, oci_status)) {
         Ns_OracleFlush (dbh);
         return TCL_ERROR;
     }
@@ -631,7 +621,21 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
                                0,
                                0,
                                OCI_DEFAULT);
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIBindByPos",
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIBindByPos",
+                    query, oci_status)) {
+        Ns_OracleFlush (dbh);
+        Ns_Free(buf);
+
+        return TCL_ERROR;
+    }
+
+    oci_status = OCIStmtExecute(connection->svc,
+                                connection->stmt,
+                                connection->err,
+                                1, 0, NULL, NULL,
+                                (connection->mode == autocommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT)
+                                );
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtExecute",
                 query, oci_status)) {
         Ns_OracleFlush (dbh);
         Ns_Free(buf);
@@ -639,23 +643,7 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    oci_status = OCIStmtExecute (connection->svc,
-                                 connection->stmt,
-                                 connection->err,
-                                 1,
-                                 0, NULL, NULL,
-                                 (connection->mode == autocommit
-                                  ? OCI_COMMIT_ON_SUCCESS
-                                  : OCI_DEFAULT));
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIStmtExecute",
-                query, oci_status)) {
-        Ns_OracleFlush (dbh);
-        Ns_Free(buf);
-
-        return TCL_ERROR;
-    }
-
-    Tcl_AppendResult (interp, buf, (char*)0L);
+    Tcl_AppendResult(interp, buf, (char*)0L);
     Ns_Free(buf);
 
     return NS_OK;
@@ -677,8 +665,7 @@ OracleExecPLSQL (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
-                     Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleExecPLSQLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -687,9 +674,9 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
     char               *retvar, *retbuf, *nbuf, *query;;
 
     if (objc < 5) {
-        Tcl_AppendResult (interp, "wrong number of args: should be `",
-                Tcl_GetString(objv[0]),
-                " exec_plsql_bind dbId sql retvar <args>'", (char*)0L);
+        Tcl_AppendResult(interp, "wrong number of args: should be `",
+                         Tcl_GetString(objv[0]),
+                         " exec_plsql_bind dbId sql retvar <args>'", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -698,8 +685,8 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
     retvar = Tcl_GetString(objv[4]);
 
     if (!allow_sql_p(dbh, query, NS_TRUE)) {
-        Tcl_AppendResult (interp, "SQL ", query, " has been rejected "
-                          "by the Oracle driver", (char*)0L);
+        Tcl_AppendResult(interp, "SQL ", query, " has been rejected "
+                         "by the Oracle driver", (char*)0L);
         return TCL_ERROR;
     }
 
@@ -709,19 +696,19 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
                                  (oci_handle_t **) &connection->stmt,
                                  OCI_HTYPE_STMT,
                                  0, NULL);
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIHandleAlloc",
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc",
                 query, oci_status)) {
         Ns_OracleFlush (dbh);
         return TCL_ERROR;
     }
 
-    oci_status = OCIStmtPrepare (connection->stmt,
-                                 connection->err,
-                                 (const OraText *)query,
-                                 (ub4) strlen(query),
-                                 OCI_NTV_SYNTAX,
-                                 OCI_DEFAULT);
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIStmtPrepare",
+    oci_status = OCIStmtPrepare(connection->stmt,
+                                connection->err,
+                                (const OraText *)query,
+                                (ub4) strlen(query),
+                                OCI_NTV_SYNTAX,
+                                OCI_DEFAULT);
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare",
                 query, oci_status)) {
         Ns_OracleFlush (dbh);
         return TCL_ERROR;
@@ -753,14 +740,14 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
             if ((index < 1) || (index > (objc - argv_base - 1))) {
 
                 if (index < 1) {
-                    Tcl_AppendResult (interp,
-                            "invalid positional variable `:",
-                            var_p->string,
-                            "', valid values start with 1", (char*)0L);
+                    Tcl_AppendResult(interp,
+                                     "invalid positional variable `:",
+                                     var_p->string,
+                                     "', valid values start with 1", (char*)0L);
                 } else {
-                    Tcl_AppendResult (interp,
-                            "not enough arguments for positional variable ':",
-                            var_p->string, "'", (char*)0L);
+                    Tcl_AppendResult(interp,
+                                     "not enough arguments for positional variable ':",
+                                     var_p->string, "'", (char*)0L);
                 }
 
                 Ns_OracleFlush(dbh);
@@ -783,9 +770,9 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
                     value = "";
                 } else {
 
-                    Tcl_AppendResult (interp, "undefined variable `",
-                            var_p->string,
-                            "'", (char*)0L);
+                    Tcl_AppendResult(interp, "undefined variable `",
+                                     var_p->string,
+                                     "'", (char*)0L);
 
                     Ns_OracleFlush(dbh);
                     string_list_free_list(bind_variables);
@@ -830,7 +817,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
                                    0,
                                    OCI_DEFAULT);
 
-        if (oci_error_p (lexpos (), dbh, "OCIBindByName", query, oci_status)) {
+        if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
             Tcl_SetResult(interp, dbh->dsExceptionMsg.string, TCL_VOLATILE);
             Ns_OracleFlush (dbh);
             string_list_free_list(bind_variables);
@@ -849,24 +836,21 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    oci_status = OCIStmtExecute (connection->svc,
-                                 connection->stmt,
-                                 connection->err,
-                                 1,
-                                 0, NULL, NULL,
-                                 (connection->mode == autocommit
-                                 ? OCI_COMMIT_ON_SUCCESS
-                                 : OCI_DEFAULT));
+    oci_status = OCIStmtExecute(connection->svc,
+                                connection->stmt,
+                                connection->err,
+                                1, 0, NULL, NULL,
+                                (connection->mode == autocommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT)
+                                );
 
     string_list_free_list(bind_variables);
 
-    if (tcl_error_p (lexpos (), interp, dbh, "OCIStmtExecute",
-                query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
         Ns_OracleFlush (dbh);
         return TCL_ERROR;
     }
 
-    Tcl_AppendResult (interp, retbuf, (char*)0L);
+    Tcl_AppendResult(interp, retbuf, (char*)0L);
 
     /* Check to see if return variable was a Tcl variable */
 
@@ -891,11 +875,11 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
  *                 [ns_ora 1row]
  *                 [ns_ora 0or1row]
  *
- *      ns_ora select dbhandle sql
- *      ns_ora dml dbhandle sql
+ *      ns_ora select    dbhandle sql
+ *      ns_ora dml       dbhandle sql
  *      ns_ora array_dml dbhandle sql
- *      ns_ora 1row dbhandle sql
- *      ns_ora 0or1row dbhandle sql
+ *      ns_ora 1row      dbhandle sql
+ *      ns_ora 0or1row   dbhandle sql
  *
  * Results:
  *
@@ -904,8 +888,7 @@ OracleExecPLSQLBind (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleSelect (Tcl_Interp *interp, int objc,
-              Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -1008,8 +991,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) &connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1019,8 +1001,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1052,8 +1033,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                     0,
                                     OCI_ATTR_PREFETCH_ROWS,
                                     connection->err);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIAttrSet", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIAttrSet", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -1068,8 +1048,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                     0,
                                     OCI_ATTR_PREFETCH_MEMORY,
                                     connection->err);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIAttrSet", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIAttrSet", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -1272,8 +1251,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                        OCI_DEFAULT);
         }
 
-        if (oci_error_p
-            (lexpos(), dbh, "OCIBindByName", query, oci_status)) {
+        if (oci_error_p(lexpos(), dbh, "OCIBindByName", query, oci_status)) {
             Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                           TCL_VOLATILE);
             Ns_OracleFlush(dbh);
@@ -1290,8 +1268,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                         connection->err,
                                         fetchbuf, list_element_put_data,
                                         fetchbuf, get_data);
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCIBindDynamic", query,
+            if (tcl_error_p(lexpos(), interp, dbh, "OCIBindDynamic", query,
                  oci_status)) {
                 Ns_OracleFlush(dbh);
                 string_list_free_list(bind_variables);
@@ -1304,8 +1281,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
                                         connection->err,
                                         fetchbuf, DynamicBindIn,
                                         fetchbuf, DynamicBindOut);
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCIBindDynamic", query,
+            if (tcl_error_p(lexpos(), interp, dbh, "OCIBindDynamic", query,
                  oci_status)) {
                 Ns_OracleFlush(dbh);
                 string_list_free_list(bind_variables);
@@ -1363,8 +1339,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
         }
     }
 
-    if (oci_error_p
-        (lexpos(), dbh, "OCIStmtExecute", query, oci_status)) {
+    if (oci_error_p(lexpos(), dbh, "OCIStmtExecute", query, oci_status)) {
         Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                       TCL_VOLATILE);
         Ns_OracleFlush(dbh);
@@ -1375,8 +1350,7 @@ OracleSelect (Tcl_Interp *interp, int objc,
         if (connection->mode == autocommit) {
             oci_status = OCITransCommit(connection->svc,
                                         connection->err, OCI_DEFAULT);
-            if (oci_error_p
-                (lexpos(), dbh, "OCITransCommit", query, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCITransCommit", query, oci_status)) {
                 Tcl_SetResult(interp, dbh->dsExceptionMsg.string,
                               TCL_VOLATILE);
                 Ns_OracleFlush(dbh);
@@ -1440,8 +1414,8 @@ OracleSelect (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 static Ns_Set *
-Oracle0or1Row (Tcl_Interp *interp, Ns_DbHandle *handle,
-               Ns_Set *row, int *nrows)
+Oracle0or1Row(Tcl_Interp *interp, Ns_DbHandle *handle,
+              Ns_Set *row, int *nrows)
 {
     ns_ora_log(lexpos(), "entry");
 
@@ -1486,9 +1460,9 @@ Oracle0or1Row (Tcl_Interp *interp, Ns_DbHandle *handle,
  *                 [ns_ora blob_dml]
  *                 [ns_ora blob_dml_file]
  *
- *      ns_ora clob_dml dbhandle sql clob1 ?clob2 ... clobN?
+ *      ns_ora clob_dml dbhandle      sql clob1 ?clob2 ... clobN?
  *      ns_ora clob_dml_file dbhandle sql path1 ?path2 ... pathN?
- *      ns_ora blob_dml dbhandle sql blob1 ?blob2 ... blobN?
+ *      ns_ora blob_dml dbhandle      sql blob1 ?blob2 ... blobN?
  *      ns_ora blob_dml_file dbhandle sql path1 ?path2 ... pathN?
  *
  * Results:
@@ -1498,10 +1472,9 @@ Oracle0or1Row (Tcl_Interp *interp, Ns_DbHandle *handle,
  *----------------------------------------------------------------------
  */
 int
-OracleLobDML (Tcl_Interp *interp, int objc,
-              Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
-    Tcl_Obj           *CONST*data;
+    Tcl_Obj           *const*data;
     oci_status_t       oci_status;
     ora_connection_t  *connection;
     char              *query;
@@ -1536,8 +1509,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1547,8 +1519,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1582,8 +1553,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
                                   -1,
                                   (blob_p) ? SQLT_BLOB : SQLT_CLOB,
                                   0, 0, 0, 0, 0, OCI_DATA_AT_EXEC);
-        if (tcl_error_p
-            (lexpos(), interp, dbh, "OCIBindByPos", query, oci_status)) {
+        if (tcl_error_p(lexpos(), interp, dbh, "OCIBindByPos", query, oci_status)) {
             Ns_OracleFlush(dbh);
             return TCL_ERROR;
         }
@@ -1591,8 +1561,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
         oci_status = OCIBindDynamic(fetchbuf->bind,
                                     connection->err,
                                     0, no_data, fetchbuf, get_data);
-        if (tcl_error_p
-            (lexpos(), interp, dbh, "OCIBindDynamic", query, oci_status)) {
+        if (tcl_error_p(lexpos(), interp, dbh, "OCIBindDynamic", query, oci_status)) {
             Ns_OracleFlush(dbh);
             return TCL_ERROR;
         }
@@ -1603,8 +1572,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
                                 connection->err,
                                 1, 0, NULL, NULL, OCI_DEFAULT);
 
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1654,8 +1622,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
                                      OCI_ONE_PIECE, 0, 0, 0,
                                      SQLCS_IMPLICIT);
 
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCILobWrite", query,
+            if (tcl_error_p(lexpos(), interp, dbh, "OCILobWrite", query,
                  oci_status)) {
                 Ns_OracleFlush(dbh);
                 return TCL_ERROR;
@@ -1666,8 +1633,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
     if (connection->mode == autocommit) {
         oci_status = OCITransCommit(connection->svc,
                                     connection->err, OCI_DEFAULT);
-        if (tcl_error_p
-            (lexpos(), interp, dbh, "OCITransCommit", query, oci_status)) {
+        if (tcl_error_p(lexpos(), interp, dbh, "OCITransCommit", query, oci_status)) {
             Ns_OracleFlush(dbh);
             return TCL_ERROR;
         }
@@ -1689,9 +1655,9 @@ OracleLobDML (Tcl_Interp *interp, int objc,
  *                 [ns_ora blob_dml_bind]
  *                 [ns_ora blob_dml_file_bind]
  *
- *      ns_ora clob_dml_bind dbhandle sql list_of_lobs ?clob1 ... clobN?
+ *      ns_ora clob_dml_bind      dbhandle sql list_of_lobs ?clob1 ... clobN?
  *      ns_ora clob_dml_file_bind dbhandle sql list_of_lobs ?clob1 ... clobN?
- *      ns_ora blob_dml_bind dbhandle sql list_of_lobs ?blob1 ... blobN?
+ *      ns_ora blob_dml_bind      dbhandle sql list_of_lobs ?blob1 ... blobN?
  *      ns_ora blob_dml_file_bind dbhandle sql list_of_lobs ?clob1 ... clobN?
  *
  * Results:
@@ -1701,8 +1667,7 @@ OracleLobDML (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleLobDMLBind (Tcl_Interp *interp, int objc,
-                  Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     oci_status_t       oci_status;
     ora_connection_t  *connection;
@@ -1711,7 +1676,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
     int                i,k;
     int                files_p = NS_FALSE;
     int                blob_p = NS_FALSE;
-    CONST char       **lob_argv;
+    const char       **lob_argv;
     int                lob_argc;
     int                argv_base;
 
@@ -1742,8 +1707,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1753,8 +1717,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -1864,9 +1827,8 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
             oci_status = OCIBindDynamic(fetchbuf->bind,
                                         connection->err,
                                         0, no_data, fetchbuf, get_data);
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCIBindDynamic", query,
-                 oci_status)) {
+            if (tcl_error_p(lexpos(), interp, dbh, "OCIBindDynamic", query,
+                            oci_status)) {
                 Ns_OracleFlush(dbh);
                 Tcl_Free((char *) lob_argv);
                 string_list_free_list(bind_variables);
@@ -1882,8 +1844,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
                                 connection->err,
                                 1, 0, NULL, NULL, OCI_DEFAULT);
 
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtExecute", query, oci_status)) {
         Ns_OracleFlush(dbh);
         string_list_free_list(bind_variables);
         return TCL_ERROR;
@@ -1940,9 +1901,8 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
                                      OCI_ONE_PIECE, 0, 0, 0,
                                      SQLCS_IMPLICIT);
 
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCILobWrite", query,
-                 oci_status)) {
+            if (tcl_error_p(lexpos(), interp, dbh, "OCILobWrite", query,
+                            oci_status)) {
                 string_list_free_list(bind_variables);
                 Ns_OracleFlush(dbh);
                 return TCL_ERROR;
@@ -1953,8 +1913,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
     if (connection->mode == autocommit) {
         oci_status = OCITransCommit(connection->svc,
                                     connection->err, OCI_DEFAULT);
-        if (tcl_error_p
-            (lexpos(), interp, dbh, "OCITransCommit", query, oci_status)) {
+        if (tcl_error_p(lexpos(), interp, dbh, "OCITransCommit", query, oci_status)) {
             string_list_free_list(bind_variables);
             Ns_OracleFlush(dbh);
             return TCL_ERROR;
@@ -1980,8 +1939,8 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
  *
  *      ns_ora clob_get_file dbhandle sql path
  *      ns_ora blob_get_file dbhandle sql path
- *      ns_ora write_clob dbhandle sql ?nbytes?
- *      ns_ora write_blob dbhandle sql ?nbytes?
+ *      ns_ora write_clob    dbhandle sql ?nbytes?
+ *      ns_ora write_blob    dbhandle sql ?nbytes?
  *
  * Results:
  *
@@ -1990,8 +1949,7 @@ OracleLobDMLBind (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleLobSelect (Tcl_Interp *interp, int objc,
-                 Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleLobSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     oci_status_t       oci_status;
     ora_connection_t  *connection;
@@ -2067,8 +2025,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         goto write_lob_cleanup;
     }
 
@@ -2078,8 +2035,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         goto write_lob_cleanup;
     }
 
@@ -2159,8 +2115,7 @@ OracleLobSelect (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleGetCols (Tcl_Interp *interp, int objc,
-               Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleGetCols(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -2179,8 +2134,7 @@ OracleGetCols (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
                                 OCI_HTYPE_STMT, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2190,8 +2144,7 @@ OracleGetCols (Tcl_Interp *interp, int objc,
                                 (const OraText *)query,
                                 (ub4) strlen(query),
                                 OCI_NTV_SYNTAX, OCI_DEFAULT);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIStmtPrepare", query, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2285,8 +2238,7 @@ OracleGetCols (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleResultRows (Tcl_Interp *interp, int objc,
-                  Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleResultRows(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -2308,8 +2260,7 @@ OracleResultRows (Tcl_Interp *interp, int objc,
                             OCI_HTYPE_STMT,
                             (oci_attribute_t *) &count,
                             NULL, OCI_ATTR_ROW_COUNT, connection->err);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIAttrGet", 0, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIAttrGet", 0, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2332,8 +2283,7 @@ OracleResultRows (Tcl_Interp *interp, int objc,
  *----------------------------------------------------------------------
  */
 int
-OracleDesc (Tcl_Interp *interp, int objc,
-            Tcl_Obj *CONST objv[], Ns_DbHandle *dbh)
+OracleDesc(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 {
     ora_connection_t  *connection;
     oci_status_t       oci_status;
@@ -2365,8 +2315,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
     oci_status = OCIHandleAlloc(connection->env,
                                 (dvoid *)&descHandlePtr,
                                 OCI_HTYPE_DESCRIBE, 0, NULL);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIHandleAlloc", package, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIHandleAlloc", package, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2376,8 +2325,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
                             (dvoid *) 1, 0,
                             OCI_ATTR_DESC_PUBLIC,
                             connection->err);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIAttrSet", package, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIAttrSet", package, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2390,8 +2338,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
                                 (ub1) 0,
                                 OCI_PTYPE_UNK,
                                 descHandlePtr);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCIDescribeAny", package, oci_status)) {
+    if (tcl_error_p(lexpos(), interp, dbh, "OCIDescribeAny", package, oci_status)) {
         Ns_OracleFlush(dbh);
         return TCL_ERROR;
     }
@@ -2421,7 +2368,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
 
     /* Resolve SYNONYM if necessary */
     if (ptype == OCI_PTYPE_SYN && resolve) {
-        CONST char *syn_name, *syn_schema;
+        const char *syn_name, *syn_schema;
         char *syn_points_to, *syn_ptr;
         ub4   syn_name_len, syn_schema_len;
 
@@ -2464,8 +2411,7 @@ OracleDesc (Tcl_Interp *interp, int objc,
                                     (ub1) 0,
                                     OCI_PTYPE_UNK,
                                     descHandlePtr);
-        if (tcl_error_p
-            (lexpos(), interp, dbh, "OCIDescribeAny", package, oci_status)) {
+        if (tcl_error_p(lexpos(), interp, dbh, "OCIDescribeAny", package, oci_status)) {
             Ns_OracleFlush(dbh);
             OCIHandleFree(descHandlePtr, OCI_HTYPE_DESCRIBE);
             return TCL_ERROR;
@@ -2528,14 +2474,14 @@ OracleDesc (Tcl_Interp *interp, int objc,
 
 /*{{{ OracleDescribeSynonym */
 void
-OracleDescribeSynonym ( OCIDescribe *descHandlePtr,
-                        OCIParam    *paramHandlePtr,
-                        ora_connection_t *connection,
-                        Ns_DbHandle *dbh,
-                        Tcl_Interp  *interp )
+OracleDescribeSynonym(OCIDescribe *descHandlePtr,
+                      OCIParam    *paramHandlePtr,
+                      ora_connection_t *connection,
+                      Ns_DbHandle *dbh,
+                      Tcl_Interp  *interp)
 {
     oci_status_t       oci_status;
-    CONST char *syn_name, *syn_schema;
+    const char *syn_name, *syn_schema;
     ub4   syn_name_len, syn_schema_len;
 
     oci_status = OCIAttrGet(paramHandlePtr,
@@ -2568,18 +2514,18 @@ OracleDescribeSynonym ( OCIDescribe *descHandlePtr,
 
 /*{{{ OracleDescribePackage */
 void
-OracleDescribePackage ( OCIDescribe      *descHandlePtr,
-                        OCIParam         *paramHandlePtr,
-                        ora_connection_t *connection,
-                        Ns_DbHandle      *dbh,
-                        char             *package,
-                        Tcl_Interp       *interp )
+OracleDescribePackage(OCIDescribe      *descHandlePtr,
+                      OCIParam         *paramHandlePtr,
+                      ora_connection_t *connection,
+                      Ns_DbHandle      *dbh,
+                      char             *package,
+                      Tcl_Interp       *interp)
 {
     OCIParam     *procListPtr, *arg, *arg1;
     oci_status_t  oci_status;
     ub2           numProcs;
     ub4           namelen;
-    CONST char   *name;
+    const char   *name;
     int           i;
 
     oci_status = OCIAttrGet (paramHandlePtr, OCI_DTYPE_PARAM, &procListPtr, 0,
@@ -2627,7 +2573,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
     oci_status_t      oci_status;
     ub2               numargs;
     ub4               namelen;
-    CONST char       *name;
+    const char       *name;
     int               i;
     Tcl_Obj          *argObj = Tcl_NewObj();
 
@@ -2794,7 +2740,7 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
 
 /*{{{ Ns_OracleInterpInit */
 static int
-Ns_OracleInterpInit (Tcl_Interp *interp, const void *dummy)
+Ns_OracleInterpInit(Tcl_Interp *interp, const void *dummy)
 {
     Tcl_CreateObjCommand (interp, "ns_ora", OracleObjCmd,
             (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
@@ -2883,16 +2829,16 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     }
 
     if (! dbh->password) {
-        error (lexpos (),
-                "Missing Password parameter in configuration file for pool %s.",
-                dbh->poolname );
+        error(lexpos(),
+              "Missing Password parameter in configuration file for pool %s.",
+              dbh->poolname );
         return NS_ERROR;
     }
 
     if (! dbh->user) {
-        error (lexpos (),
-                "Missing User parameter in configuration file for pool %s.",
-                dbh->poolname);
+        error(lexpos(),
+              "Missing User parameter in configuration file for pool %s.",
+              dbh->poolname);
         return NS_ERROR;
     }
 
@@ -3062,7 +3008,7 @@ Ns_OracleCloseDb (Ns_DbHandle *dbh)
     connection->err = 0;
 
     oci_status = OCIHandleFree(connection->auth, OCI_HTYPE_SESSION);
-    oci_error_p (lexpos (), dbh, "OCIHandleFree", 0, oci_status);
+    oci_error_p(lexpos(), dbh, "OCIHandleFree", 0, oci_status);
     connection->auth = 0;
 
     oci_status = OCIHandleFree(connection->env, OCI_HTYPE_ENV);
@@ -3271,10 +3217,9 @@ Ns_OracleExec (Ns_DbHandle *dbh, char *sql)
             /* the error getter got an error; let's bail */
             Ns_OracleFlush(dbh);
             return NS_ERROR;
-        } else if (oci_error_p
-                   (lexpos(), dbh, "OCIStmtExecute", sql, oci_status)) {
+        } else if (oci_error_p(lexpos(), dbh, "OCIStmtExecute", sql, oci_status)) {
             /* this is where we end up for an ordinary error-producing SQL statement
-               we call oci_error_p above so that crud ends up in the log */
+               we call oci_error_p() above so that crud ends up in the log */
             Ns_OracleFlush(dbh);
             return NS_ERROR;
         }
@@ -3538,8 +3483,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                                             (oci_descriptor_t *) &
                                             fetchbuf->lob, OCI_DTYPE_LOB,
                                             0, 0);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIDescriptorAlloc", 0, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIDescriptorAlloc", 0, oci_status)) {
                 Ns_OracleFlush(dbh);
                 return 0;
             }
@@ -3553,8 +3497,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                                         fetchbuf->type,
                                         &fetchbuf->is_null,
                                         0, 0, OCI_DEFAULT);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
                 Ns_OracleFlush(dbh);
                 return 0;
             }
@@ -3572,8 +3515,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                                         &fetchbuf->fetch_length,
                                         0, OCI_DYNAMIC_FETCH);
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
                 Ns_OracleFlush(dbh);
                 return 0;
             }
@@ -3593,8 +3535,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                                         &fetchbuf->fetch_length,
                                         NULL, OCI_DEFAULT);
 
-            if (oci_error_p
-                (lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
+            if (oci_error_p(lexpos(), dbh, "OCIDefineByPos", 0, oci_status)) {
                 Ns_OracleFlush(dbh);
                 return 0;
             }
@@ -3723,8 +3664,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
                                         ora_append_buf_to_dstring, (ub2) 0,
                                         (ub1) SQLCS_IMPLICIT);
 
-                if (oci_error_p
-                    (lexpos(), dbh, "OCILobRead", 0, oci_status)) {
+                if (oci_error_p(lexpos(), dbh, "OCILobRead", 0, oci_status)) {
                     Ns_OracleFlush(dbh);
                     Ns_DStringFree(&retval);
                     Ns_Free(bufp);
@@ -3780,8 +3720,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
                                                      &inoutp, &iterp,
                                                      &idxp, &piece);
 
-                    if (oci_error_p
-                        (lexpos(), dbh, "OCIStmtGetPieceInfo", 0,
+                    if (oci_error_p(lexpos(), dbh, "OCIStmtGetPieceInfo", 0,
                          oci_status)) {
                         Ns_OracleFlush(dbh);
                         return NS_ERROR;
@@ -3798,8 +3737,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
                                                      &fetchbuf->is_null,
                                                      NULL);
 
-                    if (oci_error_p
-                        (lexpos(), dbh, "OCIStmtGetPieceInfo", 0,
+                    if (oci_error_p(lexpos(), dbh, "OCIStmtGetPieceInfo", 0,
                          oci_status)) {
                         Ns_OracleFlush(dbh);
                         return NS_ERROR;
@@ -4121,8 +4059,8 @@ downcase(char *s)
 /* nilp is misnamed to some extent; handle empty or overly long strings
  *  before printing them out to logs
  */
-static CONST char *
-nilp(CONST char *s)
+static const char *
+nilp(const char *s)
 {
     if (s == 0)
         return "[nil]";
@@ -4207,7 +4145,7 @@ static int allow_sql_p(Ns_DbHandle * dbh, char *sql, int display_sql_p)
 */
 static int
 oci_error_p(const char *file, int line, const char *fn,
-            Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+            Ns_DbHandle *dbh, char *ocifn, const char *query,
             oci_status_t oci_status)
 {
     ora_connection_t *connection = 0;
@@ -4329,9 +4267,8 @@ oci_error_p(const char *file, int line, const char *fn,
                        "%s:%d:%s: error in `%s ()': %s\nSQL: ",
                        file, line, fn, ocifn, msgbuf);
         if (offset > 0)
-            len +=
-                snprintf(buf + len, STACK_BUFFER_SIZE - len, "%.*s",
-                         offset - 1, query);
+            len += snprintf(buf + len, STACK_BUFFER_SIZE - len, "%.*s",
+                            offset - 1, query);
 
         snprintf(buf + len, STACK_BUFFER_SIZE - len, " !>>>!%s",
                  query + offset);
@@ -4367,8 +4304,8 @@ oci_error_p(const char *file, int line, const char *fn,
  */
 static int
 tcl_error_p(const char *file, int line, const char *fn,
-            Tcl_Interp * interp,
-            Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+            Tcl_Interp *interp,
+            Ns_DbHandle *dbh, char *ocifn, const char *query,
             oci_status_t oci_status)
 {
     char *msgbuf;
@@ -4508,8 +4445,7 @@ error(const char *file, int line, const char *fn, char *fmt, ...)
 static void
 ns_ora_log(const char *file, int line, const char *fn, char *fmt, ...)
 {
-    char *buf1;
-    char *buf;
+    char   *buf, *buf1;
     va_list ap;
 
     if (!debug_p) {
@@ -4543,8 +4479,7 @@ malloc_fetch_buffers(ora_connection_t * connection)
 {
     int i;
 
-    connection->fetch_buffers
-        =
+    connection->fetch_buffers =
         Ns_Malloc(connection->n_columns *
                   sizeof *connection->fetch_buffers);
 
@@ -4646,7 +4581,7 @@ free_fetch_buffers(ora_connection_t * connection)
 
 /*{{{ handle_builtins*/
 
-/* this gets called on every query or dml.  Usually it will
+/* this gets called on every query or DML.  Usually, it will
    return NS_OK ("I did nothing").  If the SQL is one of our special
    cases, e.g., "begin transaction", that aren't supposed to go through
    to Oracle, we handle it and return NS_DML ("I handled it and nobody
@@ -4671,6 +4606,7 @@ handle_builtins(Ns_DbHandle * dbh, char *sql)
         connection->mode = transaction;
 
         return NS_DML;
+
     } else if (!strcasecmp(sql, "end transaction")) {
         ns_ora_log(lexpos(), "builtin `end transaction`");
 
@@ -4683,13 +4619,13 @@ handle_builtins(Ns_DbHandle * dbh, char *sql)
 
         connection->mode = autocommit;
         return NS_DML;
+
     } else if (!strcasecmp(sql, "abort transaction")) {
         ns_ora_log(lexpos(), "builtin `abort transaction`");
 
         oci_status = OCITransRollback(connection->svc,
                                       connection->err, OCI_DEFAULT);
-        if (oci_error_p
-            (lexpos(), dbh, "OCITransRollback", sql, oci_status)) {
+        if (oci_error_p(lexpos(), dbh, "OCITransRollback", sql, oci_status)) {
             Ns_OracleFlush(dbh);
             return NS_ERROR;
         }
@@ -4711,7 +4647,7 @@ handle_builtins(Ns_DbHandle * dbh, char *sql)
 /*{{{ ora_append_buf_to_dstring*/
 /* Callback function for LOB case in ora_get_row. */
 static sb4
-ora_append_buf_to_dstring(dvoid * ctxp, CONST dvoid * bufp, ub4 len,
+ora_append_buf_to_dstring(dvoid * ctxp, const dvoid *bufp, ub4 len,
                           ub1 piece)
 {
     Ns_DString *retval = (Ns_DString *) ctxp;
@@ -4823,8 +4759,7 @@ get_data(dvoid * ctxp, OCIBind * bindp,
             oci_status = OCIDescriptorAlloc(connection->env,
                                             (oci_descriptor_t *) & buf->
                                             lobs[i], OCI_DTYPE_LOB, 0, 0);
-            if (oci_error_p
-                (lexpos(), dbh, "OCIDescriptorAlloc", 0, oci_status))
+            if (oci_error_p(lexpos(), dbh, "OCIDescriptorAlloc", 0, oci_status))
                 return NS_ERROR;
         }
     }
@@ -4895,8 +4830,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     oci_status =
         OCILobGetLength(connection->svc, connection->err, lobl, &loblen);
 
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCILobGetLength", 0, oci_status))
+    if (tcl_error_p(lexpos(), interp, dbh, "OCILobGetLength", 0, oci_status))
         goto bailout;
 
 
@@ -4932,8 +4866,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                                      readlen,
                                      OCI_ONE_PIECE, 0, 0, 0,
                                      SQLCS_IMPLICIT);
-            if (tcl_error_p
-                (lexpos(), interp, dbh, "OCILobWrite", 0, oci_status)) {
+            if (tcl_error_p(lexpos(), interp, dbh, "OCILobWrite", 0, oci_status)) {
                 goto bailout;
             }
         }
@@ -5106,8 +5039,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     }
 
     oci_status = OCILobGetLength(svchp, errhp, lobl, &loblen);
-    if (tcl_error_p
-        (lexpos(), interp, dbh, "OCILobGetLength", path, oci_status))
+    if (tcl_error_p(lexpos(), interp, dbh, "OCILobGetLength", path, oci_status))
         goto bailout;
 
     amtp = loblen;
