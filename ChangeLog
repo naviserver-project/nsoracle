@@ -137,13 +137,6 @@ Date:   2020-01-17
 
 M	Makefile
 
-commit bdf823af8832e558a832cd0538a7d9ab168e0b05
-Merge: 5f56aef 234e240
-Author: Gustaf Neumann <neumann@wu-wien.ac.at>
-Date:   2020-01-06
-
-    commit
-
 commit 5f56aef9f1985dff6d2e46242fe3226dd803a079
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2020-01-06
@@ -410,15 +403,6 @@ M	README
 M	nsoracle.c
 M	nsoracle.h
 
-commit 53215920f27a5eee3dbc7cc3871f65fe9d0fb977
-Merge: 73859a1 913c5b2
-Author: Dossy Shiobara <dossy@panoptic.com>
-Date:   2011-11-04
-
-    Merge pull request #2 from jwolfe/master
-    
-    OCI_THREADED prevents crash with 11g libraries
-
 commit 913c5b245deeb32c6876cc3f7da667724caf2c08
 Author: Jonathan Wolfe <jonathan.wolfe@gmail.com>
 Date:   2011-05-23
@@ -475,7 +459,6 @@ Date:   2006-02-22
     types piecewise wasn't correctly using the null indicator
     variables.
 
-M	ChangeLog
 M	nsoracle.c
 
 commit 74e3ae61cd04a58221265112c82697d939870d7d
@@ -484,16 +467,7 @@ Date:   2006-02-22
 
     Applied patch from Bug 1435901.  Add prefetching to ns_db.
 
-M	ChangeLog
 M	nsoracle.c
-
-commit 194dc9574eed33a5eecc6d11e6388d8f9f6c1199
-Author: jcollins <jcollins>
-Date:   2006-02-21
-
-    Let's get that date right. ;)
-
-M	ChangeLog
 
 commit 7c4447c1ee49c925a60a378a586bbd40bd2ab15e
 Author: jcollins <jcollins>
@@ -501,7 +475,6 @@ Date:   2006-02-21
 
     Bug 1435187 - Applied patch.
 
-M	ChangeLog
 M	nsoracle.c
 
 commit cf30f1fd3fc536d4d4b302fb01b12a5e22ae317b
@@ -518,7 +491,6 @@ Date:   2006-02-21
 
     Bug 1435911 - Patch to silence compiler warnings.
 
-M	ChangeLog
 M	Makefile
 M	nsoracle.c
 M	nsoracle.h
@@ -531,14 +503,6 @@ Date:   2006-02-21
 
 M	nsoracle.c
 
-commit 3fcb117b6f251dd7ca49fffdfe7e8daf74785b3c
-Author: pjaol <pjaol>
-Date:   2005-05-19
-
-    Added note about typo on line 61
-
-M	ChangeLog
-
 commit 605c38215c9f75678973bbe4d10230d15d0e5413
 Author: pjaol <pjaol>
 Date:   2005-05-19
@@ -546,14 +510,6 @@ Date:   2005-05-19
     fixed a typo of a double ;;
 
 M	nsoracle.c
-
-commit 5f692575328f2ce2c8dc937d97b9ff513a5528f1
-Author: dossy <dossy>
-Date:   2005-03-21
-
-    updated
-
-M	ChangeLog
 
 commit fbe2c18ac3d5fdcc63bb6555f56d593e83ec5a45
 Author: jcollins <jcollins>
@@ -563,7 +519,6 @@ Date:   2005-02-25
     several bugs including a memory leak, and issues with the driver not
     properly reconnecting to the database after a database shutdown.
 
-M	ChangeLog
 M	TODO
 M	nsoracle.c
 
@@ -598,14 +553,6 @@ Date:   2004-09-18
 M	Makefile
 M	nsoracle.c
 M	nsoracle.h
-
-commit 269fe21c2d66535d7aa6f18feda7f3e4e2a655d4
-Author: jcollins <jcollins>
-Date:   2004-06-30
-
-    ChangeLog commit.
-
-M	ChangeLog
 
 commit 74e1e7ab79da78d35bb814df0f24c39ed6331757
 Author: jcollins <jcollins>
@@ -654,7 +601,6 @@ Date:   2004-02-12
       dynamic binding.  This allows large values to be passed in and
       returned from PL/SQL functions/procedures.
 
-M	ChangeLog
 M	nsoracle.c
 M	nsoracle.h
 
@@ -672,7 +618,6 @@ Date:   2004-02-12
     
     * version.h: Removed.  Define was moved to nsoracle.h.
 
-M	ChangeLog
 M	TODO
 M	nsoracle.c
 A	nsoracle.h
@@ -755,18 +700,9 @@ Date:   2004-02-10
     
     * doc/plsql.txt:  First cut of PL/SQL documentation from Lee Teague.
 
-M	ChangeLog
 A	doc/plsql.txt
 M	nsoracle.c
 A	plsql.tcl
-
-commit cdff1642cac5f1d7388b5b11d5badab2c4be1a1f
-Author: scottg <scottg>
-Date:   2004-02-09
-
-    Releasing 2.7
-
-M	ChangeLog
 
 commit cea789da8fdd44066b92fd891ee7f1e03b413b09
 Author: jcollins <jcollins>
@@ -783,7 +719,6 @@ Date:   2004-02-08
       old links and updated config section to use AS 3.x/4.x style
       config.
 
-M	ChangeLog
 M	Makefile
 M	doc/oracle-driver.html
 A	doc/style.css
@@ -795,7 +730,6 @@ Date:   2004-02-08
     See the ChangeLog.
 
 A	BUGS
-M	ChangeLog
 M	Makefile
 M	README
 M	doc/oracle-driver.html
@@ -833,7 +767,6 @@ Date:   2002-12-14
 
     Added 'make tag' and 'make help' targets
 
-M	ChangeLog
 M	Makefile
 
 commit e8fc74c83a2ecdb3e8492e1a213a115b6c6d1548
@@ -851,7 +784,6 @@ Date:   2002-10-09
 
     Added file-release Makefile target.
 
-M	ChangeLog
 M	Makefile
 
 commit d3bec32e3ac298123736df37107ba3e7e87929ce
@@ -892,7 +824,6 @@ Date:   2002-10-03
 
     Applied 2.7, ora8.c only.
 
-M	ChangeLog
 M	ora8.c
 
 commit 60fb422fdcac31cdc19df8257497ee9a5726702f
@@ -901,7 +832,6 @@ Date:   2002-10-03
 
     Applied 2.6.
 
-M	ChangeLog
 M	README
 M	doc/oracle-driver.html
 M	ora8.c
@@ -922,7 +852,6 @@ Date:   2002-10-03
 
     Applied nsora 2.5.
 
-M	ChangeLog
 M	Makefile
 M	README
 M	ora8.c
@@ -933,17 +862,10 @@ Date:   2002-10-03
 
     Applied nsora 2.4
 
-A	ChangeLog
 M	Makefile
 M	README
 M	doc/oracle-driver.html
 M	ora8.c
-
-commit 234e24077cd3b87ba9fba5291e131d1218619f21
-Author: scottg <scottg>
-Date:   2002-10-03
-
-    Initial import.
 
 commit 2db521471019dc641ca968202cd96955f58d98b9
 Author: scottg <scottg>
