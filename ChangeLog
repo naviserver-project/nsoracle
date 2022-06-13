@@ -1,312 +1,965 @@
-2006-02-22  Jeremy Collins <jeremy.collins@beetlebug.org>
-    * nsoracle.c: 
-    Applied patch from Bug 1435901.  Add prefetching to ns_db.
+commit a86e827954d7d8c7bdb3e1dfd7633421b92c82a8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-02-20
+
+    Whitepsace changes
+    
+    Make code more consistent and follow closer to the conventions in the NaviServer project
+
+M	nsoracle.c
+
+commit 953c72550d974de032ae0b141a20644c6205e40e
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-02-20
+
+    Added support for output columns of type SQLT_TIMESTAMP or SQLT_TIMESTAMP_TZ
+    
+    This change fixes a bug, where SQL queries of the form
+    
+         SELECT TO_TIMESTAMP(sysdate) FROM dual
+    
+    lead to errors for the form:
+    
+         Database operation "getrow" failed (exception 1406, "nsoracle.c:3659:Ns_OracleGetRow:
+         error in `OCIStmtFetch ()': ORA-01406: fetched column value was truncated
+    
+    The driver needs for several output types special rules, where the
+    timestamp cases were not supported so far. It is also recommended
+    to set the according environment variables specifying the output
+    format in the configuration server of NaviServer, such as e.g.
+    
+        set ::env(NLS_TIMESTAMP_FORMAT) "YYYY-MM-DD HH24:MI:SS.FF6"
+        set ::env(NLS_TIMESTAMP_TZ_FORMAT) "YYYY-MM-DD HH24:MI:SS.FF6 TZH:TZM"
+    
+    For testing in you local Oracle installation, you might test the output
+    formats (and the required sizes with the following snippet for sqlplus:
+    
+       COLUMN localtimestamp format a40
+       COLUMN systimestamp format a40
+       COLUMN ts_bytes format a80
+    
+       alter session set nls_timestamp_format='YYYY-MM-DD HH24:MI:SS.FF6';
+       select localtimestamp, length(localtimestamp), dump(localtimestamp) ts_bytes from dual;
+    
+       alter session set nls_timestamp_tz_format='YYYY-MM-DD HH24:MI:SS.FF6 TZH:TZM';
+       select systimestamp, length(systimestamp), dump(systimestamp) ts_bytes from dual;
+    
+       alter session set nls_timestamp_tz_format='YYYY-MM-DD HH24:MI:SS.FF6 TZR';
+       select systimestamp, length(systimestamp), dump(systimestamp) ts_bytes from dual;
+
+M	README
+M	doc/oracle-driver.html
+M	nsoracle.c
+M	nsoracle.h
+
+commit 2a651e68561d293fc61ad0232cdfabb3ec3c5ba1
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-02-11
+
+    ensure silent compilation with standard compiler settings
+
+M	nsoracle.c
+
+commit fa67c149679b6ee64ad96ece0cf96f39fc50e451
+Merge: 120d839 9e752fe
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2021-01-10
+
+    Merge branch 'master' of http://bitbucket.org/naviserver/nsoracle
+
+commit 120d839f404c9e4d454676509d7784b4116f6075
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2021-01-10
+
+    improve spelling
+
+M	README
+M	nsoracle.c
+
+commit 9e752fe14ec84d7752a14027677f32148da0c692
+Author: Andrew Piskorski <Andrew Piskorski atp@piskorski.com>
+Date:   2020-07-23
+
+    Clarify snprintf ifdef.
+
+M	nsoracle.h
+
+commit 8453f5d9a5c198c9f2bcf5cbfd0212d9d6fc4fca
+Author: Andrew Piskorski <Andrew Piskorski atp@piskorski.com>
+Date:   2020-05-02
+
+    Build nsoracle on Windows with new Makefile.win32 file.
+
+A	Makefile.win32
+M	nsoracle.h
+
+commit 95f01e4bdc6fa378ffce8f13cc3af3077383635e
+Author: Andrew Piskorski <Andrew Piskorski atp@piskorski.com>
+Date:   2020-05-02
+
+    Cast strlen() result to silence warnings about conversion from size_t to ub4, sb4, ub2.
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 2e8fbfafc4771f64e131e47db3874c4ba483413d
+Author: Andrew Piskorski <Andrew Piskorski atp@piskorski.com>
+Date:   2020-05-02
+
+    Remove snprintf() implementation, when necessary use ns_snprintf().
+    Update Ns_DbProc function pointers type to be ns_funcptr_t.
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit c9e10742c3cf85391ef857c8e35f124c59ffa252
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2020-01-17
+
+    changed the include order to avoid bad interactions between oci.h and zlib.
+    
+    with the previous include order, we run with recent oracle cersions (19.5) into
+        /usr/include/zlib.h:1677:4: error: unknown type name ‘off64_t’
+    on 64bit linux systems (centos 7)
+    
+    ns.h should be self contained, so the bunch of include files seems not necessary (anymore)
+
+M	nsoracle.h
+
+commit ee830f93640ecbeda89200af5a82fa29328886b0
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2020-01-17
+
+    add ORA_CFLAGS to allow developer to pass arbitrary include and library flags
+    
+    background: for some (newer?) version of the oracle client library,
+    ORACLE_HOME (see README) seems to be gone.
+
+M	Makefile
+
+commit bdf823af8832e558a832cd0538a7d9ab168e0b05
+Merge: 5f56aef 234e240
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2020-01-06
+
+    commit
+
+commit 5f56aef9f1985dff6d2e46242fe3226dd803a079
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2020-01-06
+
+    whitespace cleanup
+
+M	nsoracle.h
+
+commit 6b609f23f32ed01efc5cc27d3784a4e9df54ff11
+Merge: b6753d3 7f20176
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2020-01-06
+
+    merge
+
+commit 7f2017639ef146d638d63a88d47a315eb3edf85f
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2019-01-15
+
+    Cast 3rd argument of OCIAttrSet() to (void *), avoids warnings.
+
+M	nsoracle.c
+
+commit 74d9de75b8cfcbfa0c93bbb9cd1bc58ed2464cb5
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2019-01-15
+
+    debug_p should now by type bool not int.
+
+M	nsoracle.h
+
+commit c449ddbb78bdea955714bd78ecb8f88eecb19bbc
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2019-01-15
+
+    Fix build, Ns_DbDriverInit now returns type Ns_ReturnCode, not int.
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit b6753d3913cee51f84813f6ee8a0716aac3df5cb
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-11-03
+
+    fix typo
+
+M	README
+
+commit 779ac12a30c5344f21613efa4faaac317de5687f
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-05-05
+
+    remove dead assignment, whitespace changes
+
+M	nsoracle.c
+
+commit 73c8fe8269b09a5da78e3456949768770d1f5d2f
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-05-02
+
+    fix typos
+
+M	nsoracle.c
+
+commit 0f0052d27ac3aea09583dae810a890d389c1a22d
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-05-02
+
+    fix typos
+
+M	README
+M	test/bind-test.tcl
+
+commit 7c9ca694ffe25c371bf6102d5e090747fd1b1d69
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-05-02
+
+    Don't pass implementation-defined NULL after the last typed
+    argument to a variadic function
+
+M	nsoracle.c
+
+commit 7cfc889a2e33beeade7a536984dda63eff46b840
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2018-03-14
+
+    fix potential crash when oci_error_p is called with dbh == NULL (as suggested by Oleg Oleinik)
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 2090c6c04a96638332031e3291513d9db95fd012
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2017-08-28
+
+    SQL logging was not working at all.  Fix by replacing old dbh->verbose
+    checks with the new Debug(sql) Ns_LogSqlDebug approach.
+
+M	nsoracle.c
+
+commit 4ef8b1a1a6786385effa8509f6bb15f02c7a90a5
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2017-08-11
+
+    Replace obsolete interp->result approach so Tcl 8.6 works.
+
+M	Makefile
+M	nsoracle.c
+
+commit b9d0f03f7959a1be0821008c071edb20130180e4
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2017-03-01
+
+    remove unused assignment
+
+M	nsoracle.c
+
+commit 185b38038bb0738c101efface67d16c9ae98a23f
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2017-02-02
+
+    Make sure, third argument of nsprintf is always a format string
+
+M	nsoracle.c
+
+commit 31684b0473d5df063fde2693f98f0c4ba3b591e8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2016-02-04
+
+    - reduce variable scope
+
+M	nsoracle.c
+
+commit d5f43d41086206352d63b594bfef11c8d398f562
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-11-25
+
+    - adjust to new prototypes
+
+M	nsoracle.c
+
+commit dd63b4d868a1569fef098b5f1311ba04c3c4c406
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-11-22
+
+    - clean compilation with "-pedantic"
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 234928845a4346fe75c9cfd72c207996c634782e
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-29
+
+    - simplify code
+
+M	nsoracle.c
+
+commit 9486cb86ced06d7b09a9eef3450f8ff27e7db4e8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-20
+
+    - reduce variable scopes
+
+M	nsoracle.c
+
+commit 82499b051aa626c00fb363a72c7f2848c7a7a31a
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-03
+
+    - bring Makefile closer to NaviServer conventions
+
+M	Makefile
+
+commit 05429b52c89f1d592b980fe59b4164566147375c
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-01
+
+    - avoid potential null pointer exception for connection in OracleSelect()
+    - provide a warning for unhandled oci_status1 codes after OCIAttrGet() (2x)
+    - handle statuscude after  OCIStmtExecute() in ora_get_table_info()
+    - add nonnull assertions to ora_table_list(); otherwise potential null pointer exception
+
+M	nsoracle.c
+
+commit 64207f35e716e42914a52beda84275d86d3966c4
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-01
+
+    - remove unused variables
+
+M	nsoracle.c
+
+commit 84affce70432d1e1c4fe8cb2ea029f3b6537888c
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-01
+
+    - don't filter out conversion warning
+
+M	Makefile
+
+commit 167e21209696e31442997b8c17f60badc2f21775
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-01
+
+    - align README file with Makefile changes
+
+M	README
+
+commit c24e75a5044fd29be4932e1994d18ac37ef8b118
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-09-01
+
+    - align Makefile configurations with other NaviServer drivers
+
+M	Makefile
+
+commit bab517d4fa96911b02bc60ba9e2a7ec7b18e3f33
+Author: Andrew Piskorski <atp@piskorski.com>
+Date:   2014-08-31
+
+    - Add back Oracle 10g support.
+    - Fix broken OCI_MAJOR_VERSION, NS_VERSION, and HDRS stuff.
+    - Fix how NSHOME gets set so we can set just NAVISERVER when calling
+      make just like all the other modules.
+
+M	Makefile
+
+commit 07169bb931faae7bda0f5f61dda03f198add2209
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-08-30
+
+    - get rid of signed-problems (following prototypes from the oracle oci interface)
+    - driver compiles now cleanly
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 50db67121f91fd67e318a01a9875d70afb3dd9f6
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-08-30
+
+    - replaced deprecated calls
+
+M	nsoracle.c
+
+commit 2ea7e46bce78cf347a968c00213acd3fd18147a8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-08-30
+
+    - reduce number of compilation warnings from 52 to 9 (mostly warning about loosing const property)
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 04877d766cb96ddeba0b93bd684beb9708546f99
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-08-30
+
+    - allow compilation of nsoracle with Oracle client libs Version 11.2.0.4.0 (instant client package and instant client package SDK, 64-bit)
+
+M	Makefile
+M	README
+M	nsoracle.c
+M	nsoracle.h
+
+commit 53215920f27a5eee3dbc7cc3871f65fe9d0fb977
+Merge: 73859a1 913c5b2
+Author: Dossy Shiobara <dossy@panoptic.com>
+Date:   2011-11-04
+
+    Merge pull request #2 from jwolfe/master
+    
+    OCI_THREADED prevents crash with 11g libraries
+
+commit 913c5b245deeb32c6876cc3f7da667724caf2c08
+Author: Jonathan Wolfe <jonathan.wolfe@gmail.com>
+Date:   2011-05-23
+
+    add OCI_ENV_NO_MUTEX flag to OCIEnvCreate
+
+M	nsoracle.c
+
+commit 73aabad24d816cb94a82768351c5a64ca4b9204e
+Author: Jonathan Wolfe <jonathan.wolfe@gmail.com>
+Date:   2011-02-04
+
+    fix leak in inner loop of free_fetch_buffers
+
+M	nsoracle.c
+
+commit ee0d2584123006d1f1a62d9ae906d8a08c8f6650
+Author: Jonathan Wolfe <jonathan.wolfe@gmail.com>
+Date:   2011-02-04
+
+    use OCI_THREADED as 11g's client libraries cause crashes without it
+
+M	nsoracle.c
+
+commit 73859a185511c1f6434f37c8d19d968e964e1e6e
+Author: asteets <asteets>
+Date:   2010-08-25
+
+    Don't pass uninitialized pointers into OCI.  Fixes potential crash bug.
+
+M	nsoracle.c
+
+commit 8da09f2db93d0d4250d2cd1f0bfa6bbfd2d6a490
+Author: asteets <asteets>
+Date:   2008-07-14
+
+    Fix typo in error message.
+
+M	nsoracle.c
+
+commit ca837e0dfa67f8753303864bfb19947a9b6cdd81
+Author: asteets <asteets>
+Date:   2007-04-19
+
+    Prevent ORA-01405 when stored function returns NULL.  Fixes memory leak.
+
+M	nsoracle.c
+
+commit 1bd11e5487974302f113ac5efba89b14bf0d56ae
+Author: jcollins <jcollins>
+Date:   2006-02-22
+
     Fix for bug 1435192.  The code to handle fetching LONG data
     types piecewise wasn't correctly using the null indicator
     variables.
 
-2006-02-21  Jeremy Collins <jeremy.collins@beetlebug.org>
-    * nsoracle.c: 
-    Applied patch from Bug 1435905.  
-    Applied patch from Bug 1435911. 
-    Applied patch from Bug 1435187.
+M	ChangeLog
+M	nsoracle.c
 
-2005-05-19  Patrick O'Leary <pjaol@pjaol.com>
-     * nsoracle.c: changed a typo, no functional change
-2005-02-25  tag v2_8beta1
+commit 74e3ae61cd04a58221265112c82697d939870d7d
+Author: jcollins <jcollins>
+Date:   2006-02-22
 
-2005-02-25  Jeremy Collins <jeremy.collins@tclsource.org>
+    Applied patch from Bug 1435901.  Add prefetching to ns_db.
 
-    * nsoracle.c: Applied patch from Christopher Bowman 
-    <cbowman@wayport.net> that fixed several bugs including
-    a memory leak, and issues with the driver not properly
-    reconnecting to the database after a database shutdown.
+M	ChangeLog
+M	nsoracle.c
 
-2004-02-14  Jeremy Collins <jeremy.collins@tclsource.org>
+commit 194dc9574eed33a5eecc6d11e6388d8f9f6c1199
+Author: jcollins <jcollins>
+Date:   2006-02-21
+
+    Let's get that date right. ;)
+
+M	ChangeLog
+
+commit 7c4447c1ee49c925a60a378a586bbd40bd2ab15e
+Author: jcollins <jcollins>
+Date:   2006-02-21
+
+    Bug 1435187 - Applied patch.
+
+M	ChangeLog
+M	nsoracle.c
+
+commit cf30f1fd3fc536d4d4b302fb01b12a5e22ae317b
+Author: jcollins <jcollins>
+Date:   2006-02-21
+
+    Oops.
+
+M	Makefile
+
+commit 1584b1827ac9bf042618eaed82ea190779434734
+Author: jcollins <jcollins>
+Date:   2006-02-21
+
+    Bug 1435911 - Patch to silence compiler warnings.
+
+M	ChangeLog
+M	Makefile
+M	nsoracle.c
+M	nsoracle.h
+
+commit 32edd4f701100b650982b6dfb8dbeba92af2f45f
+Author: jcollins <jcollins>
+Date:   2006-02-21
+
+    Bug 1435905 - Patch to fix cmd lookup table in OracleObjCmd.
+
+M	nsoracle.c
+
+commit 3fcb117b6f251dd7ca49fffdfe7e8daf74785b3c
+Author: pjaol <pjaol>
+Date:   2005-05-19
+
+    Added note about typo on line 61
+
+M	ChangeLog
+
+commit 605c38215c9f75678973bbe4d10230d15d0e5413
+Author: pjaol <pjaol>
+Date:   2005-05-19
+
+    fixed a typo of a double ;;
+
+M	nsoracle.c
+
+commit 5f692575328f2ce2c8dc937d97b9ff513a5528f1
+Author: dossy <dossy>
+Date:   2005-03-21
+
+    updated
+
+M	ChangeLog
+
+commit fbe2c18ac3d5fdcc63bb6555f56d593e83ec5a45
+Author: jcollins <jcollins>
+Date:   2005-02-25
+
+    Applied patch from Christopher Bowman <cbowman@wayport.net> that fixed
+    several bugs including a memory leak, and issues with the driver not
+    properly reconnecting to the database after a database shutdown.
+
+M	ChangeLog
+M	TODO
+M	nsoracle.c
+
+commit 44a2f9361fbed9dd47f59a0b14b240bf3a707e8a
+Author: jcollins <jcollins>
+Date:   2004-09-20
+
+    Initialize OCI using OCIEnvCreate and have it use AOLserver's
+    memory allocators instead of its own.
+
+M	Makefile
+M	nsoracle.c
+
+commit a47b06ba45eab7c76ea8ef04cc9e49d6b1a98e79
+Author: jcollins <jcollins>
+Date:   2004-09-19
+
+    Increased the buffer for SQLT_NUM fetches.  We've had issues where 41 was
+    big enough.  Not really sure what the right value should be but 81 seems
+    safe.
+
+M	nsoracle.c
+
+commit ad5ea3789abf0adcc15277cb4835038ce8f5f62f
+Author: jcollins <jcollins>
+Date:   2004-09-18
+
+    Fixed bugs in using bind variables, ns_set binding didn't work.
+    Fixed bug that prevent clob_dml_bind from working.
+    Fixed "RETURNING INTO" to update ns_set if that was how it was bound.
+
+M	Makefile
+M	nsoracle.c
+M	nsoracle.h
+
+commit 269fe21c2d66535d7aa6f18feda7f3e4e2a655d4
+Author: jcollins <jcollins>
+Date:   2004-06-30
+
+    ChangeLog commit.
+
+M	ChangeLog
+
+commit 74e1e7ab79da78d35bb814df0f24c39ed6331757
+Author: jcollins <jcollins>
+Date:   2004-06-30
+
+    REF CURSORs were not marked as OUT variables so the associated
+    statement was never used.
+
+M	nsoracle.c
+
+commit 7f45e92ebb219de0e6edf28e58dee3373e952e86
+Author: jcollins <jcollins>
+Date:   2004-02-15
 
     * nsoracle.c, nsoracle.h: More code cleanup.  Added ability
-    to handle "RETURNING INTO" clause in DML command.  Only works
-    with named binds which is what people should be using anyway.
+      to handle "RETURNING INTO" clause in DML command.  Only works
+      with named binds which is what people should be using anyway.
 
-2004-02-12  Jeremy Collins <jeremy.collins@tclsource.org>
+M	nsoracle.c
+M	nsoracle.h
+
+commit 6a8e71a0fefd87660ddba35d15d685bd56ee154f
+Author: jcollins <jcollins>
+Date:   2004-02-13
+
+    Cleaned up [ns_ora getcols] code.
+
+M	nsoracle.c
+
+commit 5d4c4ee5f10ee0ccfe4b49dd092157a13396ee9b
+Author: jcollins <jcollins>
+Date:   2004-02-13
+
+    Update TODO list.
+    Minor improvements to PLSQL dynamic binding code.
+
+M	TODO
+M	nsoracle.c
+M	nsoracle.h
+
+commit 0cf51fe0ba48b3ee242cc097427b9689db1afac8
+Author: jcollins <jcollins>
+Date:   2004-02-12
 
     * nsoracle.c, nsoracle.h: Modified new 'plsql' command to use
-    dynamic binding.  This allows large values to be passed in and
-    returned from PL/SQL functions/procedures.
+      dynamic binding.  This allows large values to be passed in and
+      returned from PL/SQL functions/procedures.
 
-2004-02-11  Jeremy Collins <jeremy.collins@tclsource.org>
+M	ChangeLog
+M	nsoracle.c
+M	nsoracle.h
+
+commit 1834107edbea4e9b2e5094d308ea915b8dc56735
+Author: jcollins <jcollins>
+Date:   2004-02-12
 
     * nsoracle.c: Removed duplicate flush_handle code.  Moved
-    some pre-AOLserver 3.x code into #ifdef with rest of pre-AS 3.x
-    code.
-
-    Cleaned up code to conform to AOLserver engineering standards.
-
-    * nsoracle.h: Added.  
-
+      some pre-AOLserver 3.x code into #ifdef with rest of pre-AS 3.x
+      code.
+    
+      Cleaned up code to conform to AOLserver engineering standards.
+    
+    * nsoracle.h: Added.
+    
     * version.h: Removed.  Define was moved to nsoracle.h.
 
-2004-02-09  Jeremy Collins <jeremy.collins@tclsource.org>
+M	ChangeLog
+M	TODO
+M	nsoracle.c
+A	nsoracle.h
+D	version.h
+
+commit a6814b1605399cc5554142ee6d2e8748920c3fdb
+Author: jcollins <jcollins>
+Date:   2004-02-11
+
+    Couple of code cleanups.
+    Added TODO list.
+
+A	TODO
+M	nsoracle.c
+
+commit 609d0e7406e7ad87407bfb0cf38ff26a97a4d33e
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Added more comments.
+
+M	nsoracle.c
+
+commit fb0bb97abafcb01b16a79b309d46e80add3aa27c
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Added back 'exec_plsql' and 'exec_plsql_bind' as they were in version 2.7.
+
+M	nsoracle.c
+
+commit 9977a7086a5dd32ef5fe5a4ebbdd17561970ae22
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Gratuitous changes to make code more consistent.
+
+M	nsoracle.c
+
+commit b773a031b300fc16a6cf37110b691d88aec2e43d
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Was flushing handle during all calls to ns_ora when commands like 'resultrows' require
+    a previous statement to work.
+
+M	nsoracle.c
+
+commit 1f1d791e48d4a6872edd482acbeef713fdcc783f
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Changed ns_oracle calls back to ns_ora.
+
+M	nsoracle.c
+M	plsql.tcl
+
+commit 254bf264a8782459089168706691f0734e74fc94
+Author: jcollins <jcollins>
+Date:   2004-02-10
+
+    Integrated various patches from 2.5 up that were not originally
+    integrated into my version of the Oracle driver.
+
+M	nsoracle.c
+
+commit 4d584ee608a89d8c83f33163cac028349967abb7
+Author: jcollins <jcollins>
+Date:   2004-02-10
 
     * nsoracle.c: Lots of code cleanup.  Split out subcommands into
-    separate functions.  Now uses Tcl 8.x Tcl_Objs.
-
-    Two new commands:
-
+      separate functions.  Now uses Tcl 8.x Tcl_Objs.
+    
+      Two new commands:
+    
         ns_ora plsql
         ns_ora desc
-
+    
     * plsql.tcl: PL/SQL integration Tcl code from Lee Teague.
-
+    
     * doc/plsql.txt:  First cut of PL/SQL documentation from Lee Teague.
 
-2004-02-09  Scott S. Goodwin  <scott@scottg.net>
+M	ChangeLog
+A	doc/plsql.txt
+M	nsoracle.c
+A	plsql.tcl
 
-    * Release: nsoracle 2.7
+commit cdff1642cac5f1d7388b5b11d5badab2c4be1a1f
+Author: scottg <scottg>
+Date:   2004-02-09
 
-2004-02-08  Jeremy Collins <jeremy.collins@tclsource.org>
+    Releasing 2.7
+
+M	ChangeLog
+
+commit cea789da8fdd44066b92fd891ee7f1e03b413b09
+Author: jcollins <jcollins>
+Date:   2004-02-08
 
     * Makefile: Added LDFLAGS, and LIBS variables back to
-    link line so that the driver will compile on Mac OS X.
-
-    Added a check to see if we are compiling against AOLserver 4.x
-    and if so add -lnsdb to link line.
-
+      link line so that the driver will compile on Mac OS X.
+    
+      Added a check to see if we are compiling against AOLserver 4.x
+      and if so add -lnsdb to link line.
+    
     * doc/oracle-driver.html: Reformatted HTML using a nifty
-    new stylesheet.  Also cleaned up some of the wording.  Removed
-    old links and updated config section to use AS 3.x/4.x style
-    config.
+      new stylesheet.  Also cleaned up some of the wording.  Removed
+      old links and updated config section to use AS 3.x/4.x style
+      config.
 
-2004-02-06  Scott S. Goodwin  <scott@scottg.net>
+M	ChangeLog
+M	Makefile
+M	doc/oracle-driver.html
+A	doc/style.css
 
-    * version.h: changed version string from ORA8_DRIVER_VERSION to
-    NSORACLE_VERSION and incremented from 2.6 to 2.7.
+commit 96009d12a2b59ee1206febf4b1125cf8a685c463
+Author: scottg <scottg>
+Date:   2004-02-08
 
-    * ora8.c, nsoracle.c: rename ora8.c to nsoracle.c; altered Makefile to
-    conform. This means you'll need to change your nsd.tcl file to load
-    nsoracle.so instead of ora8.so.
+    See the ChangeLog.
 
-    * ChangeLog: I've moved change notes I found in the README and the
-    doc/oracle-driver.html files to the end of this ChangeLog.
-    
-    * BUGS: added and moved bug info from README into here.
+A	BUGS
+M	ChangeLog
+M	Makefile
+M	README
+M	doc/oracle-driver.html
+D	makefile-80
+R098	ora8.c	nsoracle.c
+M	version.h
 
-    * Makefile, makefile-80: Removed makefile-80; Jeremy Collins worked the
-    Makefile to be more responsive and try to determine whether it needs to
-    compile against Oracle 8 or 9 libraries.
+commit 117bee9725a99d39bffa4ad72263f32e82491cb9
+Author: jcdlondon <jcdlondon>
+Date:   2003-04-09
 
-2002-12-13  Scott S. Goodwin  <scott@scottg.net>
+    ignore error return 1405 for LONGs which are NULL (as in the oracle data dictionary)
 
-	* Makefile: Added 'make help' and 'make tag' targets.
+M	ora8.c
 
-2002-11-14   Scott S. Goodwin  <scott@scottg.net>
+commit 7fe2e618554a83d47ef535f5b2dc1e2f5eeff14d
+Author: jcdlondon <jcdlondon>
+Date:   2003-02-17
 
-    * Release 2.6: 
-    
-    Fix buffer size for RAW columns.  Thanks Mike Linksvayer
-    <ml@gondwanaland.com>.
-    
-    Added CharExpansion parameter. Thanks Tomasz Kosiak <tkosiak@arena.pl>.
+    check if NS_DML defined to determine whether to include nsdb.h
 
-2002-10-09  Scott S. Goodwin  <scott@scottg.net>
+M	ora8.c
 
-	* Makefile: Added 'file-release' target. This target will
-	automatically check out the tag version you give it and package it
-	into a file release. Stolen from Rob Mayoff's nscache
-	Makefile. Use it like this:
+commit 88d526c011b1eb1bac28576fc9c9871d7d72fd8b
+Author: jcdlondon <jcdlondon>
+Date:   2003-02-17
 
-	    make file-release VER=2.4
+    back to unix line endings bug 669839
 
-	* ora8.c: Jeff Davis applied patch 620469, by Matthew Krenzer.
+M	ora8.c
 
-2002-10-03  Scott S. Goodwin  <scott@scottg.net>
+commit 944a5cf14ac97643f7ecac3cc436b6c16f6a87f3
+Author: scottg <scottg>
+Date:   2002-12-14
 
-	* all: Applied nsora 2.7 (only the ora8.c file). Tagged as
-	v2_7beta1.
+    Added 'make tag' and 'make help' targets
 
-	* all: Applied nsora 2.6. Tagged as v2_6.
+M	ChangeLog
+M	Makefile
 
-	* all: Applied nsora 2.5. Tagged as v2_5.
+commit e8fc74c83a2ecdb3e8492e1a213a115b6c6d1548
+Author: scottg <scottg>
+Date:   2002-10-09
 
-	* all: Applied nsora 2.4 and committed.
+    Added MODNAME var to Makefile. This will become important once file-release
+    and other targets are moved into aolserver/include/Makefile.module.
 
-	* ChangeLog: Added. This initial import is from nsora 2.3. The
-	module's name is nsoracle. Tagged as v2_3.
+M	Makefile
 
-2001-01-17   Unknown
+commit 172ce608ef65831918579f3133ee8ee80fe11909
+Author: scottg <scottg>
+Date:   2002-10-09
 
-    * Release 2.5: 
+    Added file-release Makefile target.
 
-    Fix spurious frees in exec_plsql_bind when there were undefined bind
-    varaibles.
+M	ChangeLog
+M	Makefile
 
-    Fix frees lob_dml_bind_cmd which should have freed lob_argv rather than
-    argv.
+commit d3bec32e3ac298123736df37107ba3e7e87929ce
+Author: jcdlondon <jcdlondon>
+Date:   2002-10-08
 
-    Fix free of fetchbuf->array_values (should use Tcl_Free when allocation is
-    by Tcl_SplitList).
+    Dont flush null connection bug 620469/patch 32645 Matthew Krenzer
 
-    Added support for oracle LONGs of greater than 1024 bytes.
+M	ora8.c
 
-    Added support for setting prefetchrows and prefetchmemory to improve
-    throughput on nonlocal oracle connections (by davis@arsdigita.com).
+commit 1efdb38039d19920939ee05bcfe288619e547afa
+Author: jcdlondon <jcdlondon>
+Date:   2002-10-08
 
-2000-10-12   Unknown
+    use INSTALL_SH instead of CP.  Should fix this the right way though
 
-    * Release 2.4:
-    
-    Make LOB buffer size a configuration parameter so we can work around
-    mysterious ORA-24812 bug.
-    
-    Set parameter LobBufferSize in ns/db/driver/ora to the desired buffer
-    size.
+M	Makefile
 
-2000-09-11   Unknown
+commit 73f413cdc2b10637bbf935423532ef520b4e86a0
+Author: jcdlondon <jcdlondon>
+Date:   2002-10-08
 
-    * Release 2.3:
+    patch from Lars Pind to catch unset user or password
 
-	New Makefile based on AOLserver 3 Makefiles.
+M	ora8.c
 
-	Beginnings of a code reorganization.
+commit c9f1ffbe584e31bb97683d1560905569686dc3c1
+Author: jcdlondon <jcdlondon>
+Date:   2002-10-08
 
-	Eliminated a tiny memory leak in the [bc]lob_dml* commands.
+    add includes after Makefile.global since Makefile.global stomps it
 
-2000-07-28   Unknown
+M	Makefile
 
-    * Release 2.2:
+commit 3307e9e5d7f9b7f87fec6685836fa7186232acf3
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    Fixed a problem with EPIPE handling in stream_write_lob (Contributed by
-    Paul Laferriere).
+    Applied 2.7, ora8.c only.
 
-    Fixed a problem with handling UTF-8 data in LOBs (Contributed by Jin
-    Choi).
+M	ChangeLog
+M	ora8.c
 
-    Added clob_dml_bind, clob_dml_file_bind, blob_dml_bind,
-    blob_dml_file_bind, exec_plsql_bind functions.
+commit 60fb422fdcac31cdc19df8257497ee9a5726702f
+Author: scottg <scottg>
+Date:   2002-10-03
 
-2000-05-01 Unknown
+    Applied 2.6.
 
-    * Release 2.1: 
-    
-    Plugged some potential buffer overflow situations when reporting errors.
+M	ChangeLog
+M	README
+M	doc/oracle-driver.html
+M	ora8.c
+M	version.h
+M	win32/ora8/ora8.dsp
 
-    Added bind variable support.
+commit 94692d3d960a9f4c9d18cec77ff3b208537c8a82
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    The error message for certain SQL errors now indicates the location in the
-    SQL of the error (contributed by H.B. Weinberg).
+    Added version.h. Oops.
 
-    You can now use ns_dberrorcode to get the numeric Oracle error code after
-    an error.
+A	version.h
 
-    We no longer put huge arrays on the stack, so you shouldn't need to turn
-    up your AOLserver stack size so much any more.
+commit 396fa0349fb61cc504eaddd13176cd00fc4e2130
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    Fixed some memory-allocation problems in bind variable support (we were
-    not calling Ns_StrDup in all the right places).
+    Applied nsora 2.5.
 
-    Expanded bind-variable support.
+M	ChangeLog
+M	Makefile
+M	README
+M	ora8.c
 
-    Added array DML.
+commit ad598878ca98abd9107b6bb597b7f27a9a9468dc
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    Fixed bug when reading partial LOBs.
+    Applied nsora 2.4
 
-    Added support for building on Win32 platforms.
+A	ChangeLog
+M	Makefile
+M	README
+M	doc/oracle-driver.html
+M	ora8.c
 
-2000-01-14   Unknown
+commit 234e24077cd3b87ba9fba5291e131d1218619f21
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    * Release 2.0.1: Fixed linking problem on Linux and AOLserver 3 (fstat
-    wasn't being linked in with AOLserver 3, so wasn't being found when the
-    driver was loaded).
+    Initial import.
 
-2000-01-06   Unknown
+commit 2db521471019dc641ca968202cd96955f58d98b9
+Author: scottg <scottg>
+Date:   2002-10-03
 
-    * Release 2.0:
-    
-    Fixed error where *lob_get_file would leave temporary files in /var/tmp.
+    Initial revision
 
-    Optimized *lob_get_file to return directly to the connection rather than
-    spooling from the file system.
-
-    It's now easier to see what version of the driver you are running.
-
-    Perform a "strings ora8.so | grep ArsDigita" to get the version number.
-
-    Fixed ora_open_db to return a better error than "NULL Connection" if it
-    fails to connect to Oracle.
-
-    Fixed a number of errors found by Jin Choi (jsc@arsdigita.com).
-
-    Added cleanup if the oracle process dies unexpectedly (which would
-    ultimately lead to the "hostdef extension doesn't exist" error).
-
-    Added cleanup of the oracle process if a "too many oracle processes"
-    (ORA-00020) or "oracle not available" (ORA-01034) error occurs.
-
-    Added in re-implementations of some functions that were removed from
-    AOLserver 3.0 but are needed by ACS.
-
-    The oracle 8.1.X makefile is now the default makefile.  If you're still
-    using Oracle 8.0.X, you'll need to use the makefile-80: gmake -f
-    makefile-80.
-
-1999-06-11   Unknown
-
-    * Release 1.0.3: Turned OCI_SUCCESS_WITH_INFO into a non-error condition.
-    Oracle changed behavior between 8.0.X and 8.1.X, causing the use of
-    aggregate functions with NULLs to generate a warning.  Since NULLs in
-    aggregates usually aren't a problem, we recommend upgrading to this
-    version from 1.0.2
-
-1999-04-14   Unknown
-
-    * Release 1.0.2: 
-    
-    Now printing Oracle's warning messages when a result code of
-    OCI_SUCCESS_WITH_INFO is returned (which can happen in cases like having
-    NULL values in aggregate functions).
-
-    Added an experimental makefile for building against Oracle 8.1 The syntax
-    to use is gmake -f makefile-8.1.
-
-1999-04-05   Unknown
-
-    * Release 1.0.1: Fixed ns_ora clob_get_file so it won't leak open files
-    (fix donated by Igor Baikalov - thanks!).
-
-1999-03-12   Unknown
-
-    * Release 1.0:
-
-    Fixed corrupted return data for LONG columns < 1024 bytes.  LONG columns
-    over 1024 bytes are not supported.
-
-    Fixed complaint when inserting an empty string via clob_dml.  It now
-    inserts a NULL value in this case
-
-    Added clob_dml_file and clob_get_file commands
-
-    Added write_clob command
-
-    Added blob versions of all of the clob commands 
-
-    Added safety features for <a
-    href="http://arsdigita.com/free-tools/cassandracle.html">Cassandracle</a> 
-
-    Added the debug configuration parameter, so now getting trace output
-    doesn't require recompiling the driver
-
-    clob_dml SQL and the CLOB contents are now logged to the server.log when
-    verbose=on is set in the pool's configuration
-
-    Rewrote makefiles so the same makefile works on Solaris, HP-UX 11.00, and
-    Linux
-
-1999-01-13   Unknown
-
-    * Release 0.6: Comments and fix for truncation of NUMBER values error.
-
-1997-06-01   Unknown (Cotton Seed?)
-
-    * First release.
-
-$Header$
+A	Makefile
+A	README
+A	doc/oracle-driver.html
+A	makefile-80
+A	ora8.c
+A	test/bind-test.tcl
+A	test/clob-test.tcl
+A	test/error-test.tcl
+A	test/table-test.tcl
+A	win32/README
+A	win32/ora8.dsw
+A	win32/ora8/ora8.dsp
