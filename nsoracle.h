@@ -1,5 +1,5 @@
 
-#define NSORACLE_VERSION       "2.8"
+#define NSORACLE_VERSION       "2.9"
 
 #define STACK_BUFFER_SIZE      20000
 #define EXEC_PLSQL_BUFFER_SIZE 4096

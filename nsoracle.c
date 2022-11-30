@@ -4963,11 +4963,18 @@ stream_actually_write(int fd, Ns_Conn * conn, void *bufp, int length,
 
     if (to_conn_p) {
         struct iovec sbuf;
+        Ns_ReturnCode status;
 
         sbuf.iov_base = bufp;
         sbuf.iov_len = length;
 
-        if (Ns_ConnWriteVChars(conn, &sbuf, 1, NS_CONN_STREAM) == NS_OK) {
+        if ((conn->flags & NS_CONN_WRITE_ENCODED) == 0u) {
+            status = Ns_ConnWriteVData(conn, &sbuf, 1, NS_CONN_STREAM);
+        } else {
+            status = Ns_ConnWriteVChars(conn, &sbuf, 1, NS_CONN_STREAM);
+        }
+
+        if (status == NS_OK) {
             bytes_written = length;
         } else {
             bytes_written = 0;
