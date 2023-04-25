@@ -582,7 +582,7 @@ OracleExecPLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle 
         return TCL_ERROR;
     }
 
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc (connection->env,
                                  (oci_handle_t **) &connection->stmt,
@@ -690,7 +690,7 @@ OracleExecPLSQLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHan
         return TCL_ERROR;
     }
 
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc (connection->env,
                                  (oci_handle_t **) &connection->stmt,
@@ -798,7 +798,7 @@ OracleExecPLSQLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHan
             fetchbuf->is_null = 0;
         }
 
-        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
+        Ns_Log(Debug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora exec_plsql_bind:  binding variable %s",
                 var_p->string);
 
@@ -952,18 +952,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
         return TCL_ERROR;
     }
 
-    /*
-     * In the old days we'd do this sort of thing:
-     *    if(dbh->verbose) Ns_Log(Notice, "SQL():  %s", query);
-     * But that no longer works in the current NaviServer.  The database
-     * handle verbose flag is obsolete, and dbh->verbose is apparently ALWAYS
-     * false.  Instead, set this in your config file:
-     *    ns_logctl severity Debug(sql) on
-     * And the calls below like this will then emit SQL into the log:
-     *    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
-     * --atp@piskorski.com, 2017/08/28 10:32 EDT
-     */
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
 
     /* In order to handle transactions we check now for our
@@ -1221,7 +1210,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
             fetchbuf->is_null = 0;
         }
 
-        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
+        Ns_Log(Debug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora dml:  binding variable %s", var_p->string);
 
         if (array_p || dml_p) {
@@ -1504,7 +1493,7 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
         return TCL_ERROR;
     }
 
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
@@ -1584,11 +1573,11 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
         ub4 length = -1;
 
         if (files_p) {
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, filename %s", i,
+            Ns_Log(Debug, "  CLOB # %d, filename %s", i,
                    Tcl_GetString(data[i]));
         } else {
             length = (ub4) strlen(Tcl_GetString(data[i]));
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, length %d: %s", i, length,
+            Ns_Log(Debug, "  CLOB # %d, length %d: %s", i, length,
                    (length == 0) ? "(NULL)" :
                    Tcl_GetString(data[i]));
         }
@@ -1702,7 +1691,7 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
         return TCL_ERROR;
     }
 
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
     oci_status = OCIHandleAlloc(connection->env,
                                 (oci_handle_t **) & connection->stmt,
@@ -1784,7 +1773,7 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
         fetchbuf->fetch_length = (ub2) strlen(fetchbuf->buf) + 1;
         fetchbuf->is_null = 0;
 
-        Ns_Log(Ns_LogSqlDebug, "bind variable '%s' = '%s'", var_p->string, value);
+        Ns_Log(Debug, "bind variable '%s' = '%s'", var_p->string, value);
         ns_ora_log(lexpos(), "ns_ora clob_dml:  binding variable %s",
             var_p->string);
 
@@ -1863,10 +1852,10 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
 
 
         if (files_p) {
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, filename %s", i, fetchbuf->buf);
+            Ns_Log(Debug, "  CLOB # %d, filename %s", i, fetchbuf->buf);
         } else {
             length = (ub4) strlen(fetchbuf->buf);
-            Ns_Log(Ns_LogSqlDebug, "  CLOB # %d, length %d: %s", i, length,
+            Ns_Log(Debug, "  CLOB # %d, length %d: %s", i, length,
                    (length == 0) ? "(NULL)" : fetchbuf->buf);
         }
 
@@ -2012,7 +2001,7 @@ OracleLobSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle 
         goto write_lob_cleanup;
     }
 
-    Ns_Log(Ns_LogSqlDebug, "SQL():  %s", query);
+    Ns_Log(Debug, "SQL():  %s", query);
 
     oci_status = OCIDescriptorAlloc(connection->env,
                                     (dvoid **) & lob,
