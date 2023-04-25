@@ -2,7 +2,7 @@ commit a86e827954d7d8c7bdb3e1dfd7633421b92c82a8
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2022-02-20
 
-    Whitepsace changes
+    Whitespace changes
     
     Make code more consistent and follow closer to the conventions in the NaviServer project
 
@@ -387,7 +387,7 @@ commit 2ea7e46bce78cf347a968c00213acd3fd18147a8
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2014-08-30
 
-    - reduce number of compilation warnings from 52 to 9 (mostly warning about loosing const property)
+    - reduce number of compilation warnings from 52 to 9 (mostly warning about losing const property)
 
 M	nsoracle.c
 M	nsoracle.h
@@ -709,7 +709,7 @@ Author: jcollins <jcollins>
 Date:   2004-02-08
 
     * Makefile: Added LDFLAGS, and LIBS variables back to
-      link line so that the driver will compile on Mac OS X.
+      link line so that the driver will compile on macOS.
     
       Added a check to see if we are compiling against AOLserver 4.x
       and if so add -lnsdb to link line.
@@ -790,7 +790,7 @@ commit d3bec32e3ac298123736df37107ba3e7e87929ce
 Author: jcdlondon <jcdlondon>
 Date:   2002-10-08
 
-    Dont flush null connection bug 620469/patch 32645 Matthew Krenzer
+    Don't flush null connection bug 620469/patch 32645 Matthew Krenzer
 
 M	ora8.c
 

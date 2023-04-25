@@ -66,7 +66,7 @@ to determine how many rows were deleted or updated.
 <div class="api">
 <h4><b>ns_ora exec_plsql</b> <i>dbhandle sql</i></h4>
 <h5>
-Executes the given PL/SQL statement, returing the value of the first bind
+Executes the given PL/SQL statement, returning the value of the first bind
 variable in the statement.
 </h5>
 </div>
@@ -77,7 +77,7 @@ variable in the statement.
 <b>ns_ora blob_dml</b> <i>dbhandle sql blob_value_1 ?blob_value 2 ...  blob_value_N?</i>
 </h4>
 <h5>
-Evaluates the given sql statement, inserting the the given values 
+Evaluates the given SQL statement, inserting the given values
 into the columns specified by the bind variables referenced.
 </h5>
 
@@ -88,7 +88,7 @@ into the columns specified by the bind variables referenced.
 <b>ns_ora blob_dml_file</b> <i>dbhandle sql path1 ?path2 ... pathN?</i>
 </h4>
 <h5>
-Evaluates the given sql statement, inserting the contents of the
+Evaluates the given SQL statement, inserting the contents of the
 given files into the columns as specified by the bind variables
 referenced.
 </h5>
@@ -100,7 +100,7 @@ referenced.
 <b>ns_ora blob_get_file</b> <i>dbhandle sql path</i>
 </h4>
 <h5>
-Evaluates the given sql statement (which should return just one column
+Evaluates the given SQL statement (which should return just one column
 from one row) and writes the value to the specified file.  (any previous
 file contents will be replaced by the new value)  The caller is
 responsible for deleting the file.
@@ -113,7 +113,7 @@ responsible for deleting the file.
 <b>ns_ora write_blob</b> <i>dbhandle sql ?nbytes?</i>
 </h4>
 <h5>
-Evaluates the given sql statement (which should return just one column
+Evaluates the given SQL statement (which should return just one column
 from one row) and returns the value to the connection.  You can
 specify the number of bytes to be returned in the nbytes argument.  By
 default the entire BLOB/CLOB is returned.
@@ -209,7 +209,7 @@ if [catch { ns_db dml $db "insert into ..."
 </pre>
 
 This will roll back the transaction if an error happened during the
-processing of the insert and update.  If they finished succesfully,
+processing of the insert and update.  If they finished successfully,
 commit the transaction.
 
 <p>
@@ -252,7 +252,7 @@ this.
 Note that only DML statements (insert, update, delete) are affected by
 transactions.  DDL statements (create table, etc.) are <b>not</b> affected
 by transactions.  You can't roll back a table creation; to leave the
-database in a consistant state after a failed transaction, you
+database in a consistent state after a failed transaction, you
 must wrap the transaction in a "catch" that explicitly drops
 the table upon error.
 
@@ -312,7 +312,7 @@ into :one, :two, :three" $new_self_desc $new_bondage_story $new_perfect_mate_des
 </pre>
 
 This updates the row where person_id = 96, setting the three CLOB
-columns to the values of the tcl variables $new_self_desc,
+columns to the values of the Tcl variables $new_self_desc,
 $new_bondage_story, $new_perfect_mate_desc.  If there were multiple rows
 with person_id = 96, each row is updated with the new CLOB values.
 
@@ -321,8 +321,8 @@ with person_id = 96, each row is updated with the new CLOB values.
 Inserting the contents of files into CLOBs or BLOBs is similar to the
 use of the clob_dml command.  (Note that you can use <a href=
 "http://www.aolserver.com/server/docs/2.3/html/tapi-c88.htm">
-ns_queryget</a> to get the file name of data uploaded via multipart
-formdata.  You will probabily also want to view 
+ns_queryget</a> to get the filename of data uploaded via multipart
+formdata.  You will probably also want to view
 <a
 href="http://wimpy.arsdigita.com/public/presentation-top.adp?presentation_id=7042&user_id=561">this
 lecture by Philip Greenspun on how to do file upload with AOLserver</a>.)
@@ -342,7 +342,7 @@ returning mp3 into :1" /net/downloads/getoutofschool.mp3
 But here, instead of supplying a string to insert into the column,
 you're specifying the path to a file.  The Oracle driver will read the
 contents of the file and insert it into the database.  Why have this
-seperate mechanism?  AOLserver uses Tcl 7.4 which can't handle
+separate mechanism?  AOLserver uses Tcl 7.4 which can't handle
 embedded null-characters in its variables, so there's no way through
 the Tcl API to read a binary file without the data getting munged.
 
@@ -383,7 +383,7 @@ ns_ora write_blob $db "select mp3 ..."
 </pre>
 
 <code>ReturnHeaders</code> is defined in the standard 
-ArsDigita utlities.tcl file, available from 
+ArsDigita utilities.tcl file, available from
 <a href="http://arsdigita.com/books/panda/utilities.txt">http://arsdigita.com/books/panda/utilities.txt</a>.
 
 <p>

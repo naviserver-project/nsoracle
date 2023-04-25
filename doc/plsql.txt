@@ -133,7 +133,7 @@ This is the big one. I'll start with an example.
     director_securities_firms director_public_companies status
 
 It returned an array containing all the data from the REF CURSOR.  This is the 
-default behavior and can be overriden.
+default behavior and can be overridden.
 
 Here's the body of REF_EXAMPLE.GET_CLIENTS:
 

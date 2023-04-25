@@ -2936,7 +2936,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
     if (oci_error_p(lexpos(), dbh, "OCIAttrSet", 0, oci_status))
         return NS_ERROR;
 
-    /* the OCI docs say this "creates a user sesion and begins a
+    /* the OCI docs say this "creates a user session and begins a
        user session for a given server */
     oci_status = OCISessionBegin(connection->svc,
                                  connection->err,
@@ -4298,7 +4298,7 @@ oci_error_p(const char *file, int line, const char *fn,
 /*}}}*/
 
 /*{{{ tcl_error_p */
-/* tcl_error_p is only used for ns_ora and potentialy other new Tcl commands
+/* tcl_error_p is only used for ns_ora and potentially other new Tcl commands
    does not log the error and does not Ns_DbSetException but instead just
    tells the Tcl interpreter about it
  */
