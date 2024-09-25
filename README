@@ -77,6 +77,20 @@ NOTES:
         if your Oracle is not using UTF-8, in which case a value of 2 should
         work for any ISO-8859 character set.
 
+     EnvCharset: integer defaulting to 0
+        Client-side character set id that will be used for the
+        environment handle created upon connecting to the
+        database. Corresponds to the charset argument of the
+        OCIEnvNlsCreate function. Useful when the database uses a
+        different encoding than NaviServer.
+
+     EnvNCharset: integer defaulting to 0
+        Client-side national character set id that will be used for
+        the environment handle created upon connecting to the
+        database. Corresponds to the ncharset argument of the
+        OCIEnvNlsCreate function. Useful when the database uses a
+        different encoding than NaviServer.
+
    ns_ora clob_dml SQL is logged when verbose=on in the pool's configuration
    section.
 

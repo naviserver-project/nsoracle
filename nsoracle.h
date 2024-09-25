@@ -315,6 +315,8 @@ static bool debug_p = NS_FALSE;
 static int max_string_log_length = 0;
 static unsigned int lob_buffer_size = 16384;
 static int char_expansion;
+static ub2 env_charset;
+static ub2 env_ncharset;
 
 /* Prefetch parameters, if zero leave defaults */
 static int prefetch_rows = 0;
