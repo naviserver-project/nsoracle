@@ -2693,6 +2693,20 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
     }
     Ns_Log(Notice, "%s driver LobBufferSize = %d", hdriver, lob_buffer_size);
 
+    if (Ns_ConfigGetInt(config_path, "EnvCharset", &config_value)) {
+        env_charset = (ub4)config_value;
+    } else {
+        env_charset = 0;
+    }
+    Ns_Log(Notice, "%s driver EnvCharset = %d", hdriver, env_charset);
+
+    if (Ns_ConfigGetInt(config_path, "EnvNCharset", &config_value)) {
+        env_ncharset = (ub4)config_value;
+    } else {
+        env_ncharset = 0;
+    }
+    Ns_Log(Notice, "%s driver EnvNCharset = %d", hdriver, env_ncharset);
+
     if (!Ns_ConfigGetInt(config_path, "PrefetchRows", &prefetch_rows))
         prefetch_rows = 0;
     Ns_Log(Notice, "%s driver PrefetchRows = %d", hdriver, prefetch_rows);
@@ -2849,14 +2863,17 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
      */
     dbh->connection = connection;
 
-    oci_status = OCIEnvCreate(&connection->env,
-                              OCI_THREADED|OCI_ENV_NO_MUTEX,
-                              NULL,
-                              Ns_OracleMalloc,
-                              Ns_OracleRealloc,
-                              Ns_OracleFree,
-                              0, 0);
-    if (oci_error_p(lexpos(), NULL, "OCIEnvCreate", 0, oci_status))
+    oci_status = OCIEnvNlsCreate(&connection->env,
+                                 OCI_THREADED|OCI_ENV_NO_MUTEX,
+                                 NULL,
+                                 Ns_OracleMalloc,
+                                 Ns_OracleRealloc,
+                                 Ns_OracleFree,
+                                 0,
+                                 0,
+                                 env_charset,
+                                 env_ncharset);
+    if (oci_error_p(lexpos(), NULL, "OCIEnvNlsCreate", 0, oci_status))
         return NS_ERROR;
 
 
