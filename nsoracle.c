@@ -16,6 +16,8 @@
 static sb2 null_ind = -1;
 static ub2 rc = 0;
 static ub4 rl = 0;
+static bool convert_encoding_p = NS_FALSE;
+
 NS_EXPORT NsDb_DriverInitProc Ns_DbDriverInit;
 
 /*
@@ -2676,6 +2678,8 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
     if (!Ns_ConfigGetBool(config_path, "Debug", &debug_p))
         debug_p = DEFAULT_DEBUG;
 
+    convert_encoding_p = Ns_ConfigBool(config_path, "ConvertEncoding", NS_FALSE);
+
     if (!Ns_ConfigGetInt
         (config_path, "MaxStringLogLength", &max_string_log_length))
         max_string_log_length = DEFAULT_MAX_STRING_LOG_LENGTH;
@@ -2849,17 +2853,48 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
      */
     dbh->connection = connection;
 
-    oci_status = OCIEnvCreate(&connection->env,
-                              OCI_THREADED|OCI_ENV_NO_MUTEX,
-                              NULL,
-                              Ns_OracleMalloc,
-                              Ns_OracleRealloc,
-                              Ns_OracleFree,
-                              0, 0);
-    if (oci_error_p(lexpos(), NULL, "OCIEnvCreate", 0, oci_status))
-        return NS_ERROR;
+    if (convert_encoding_p) {
+        /*
+         * Value for the character set IDs. Since the client side (Tcl) is
+         * always converting from and to UTF-8, we tell Oracle that the client
+         * is UTF-8 and not necessarily the same as the database
+         * encoding. Since the interface requires the ID to be set when
+         * establishing the connection, we provide here the value hard-coded
+         * (which seems common practice).
+         *
+         * The ID can be obtained from Oracle via the following SQL statement.
+         *
+         *    col nls_charset_id for 9999
+         *    col value for a20
+         *    select nls_charset_id(value) nls_charset_id, value from v$nls_valid_values
+         *           where parameter = 'CHARACTERSET' and value like '%UTF%';
+         */
+        const ub2 AL32UTF8 = 873;
 
-
+        oci_status = OCIEnvNlsCreate(&connection->env,
+                                     OCI_THREADED|OCI_ENV_NO_MUTEX,
+                                     NULL,
+                                     Ns_OracleMalloc,
+                                     Ns_OracleRealloc,
+                                     Ns_OracleFree,
+                                     0, NULL,
+                                     AL32UTF8, AL32UTF8
+                                     );
+        if (oci_error_p(lexpos(), NULL, "OCIEnvNlsCreate", 0, oci_status)) {
+            return NS_ERROR;
+        }
+    } else {
+        oci_status = OCIEnvCreate(&connection->env,
+                                  OCI_THREADED|OCI_ENV_NO_MUTEX,
+                                  NULL,
+                                  Ns_OracleMalloc,
+                                  Ns_OracleRealloc,
+                                  Ns_OracleFree,
+                                  0, NULL);
+        if (oci_error_p(lexpos(), NULL, "OCIEnvCreate", 0, oci_status)) {
+            return NS_ERROR;
+        }
+    }
 
     /* sets connection->err */
     oci_status = OCIHandleAlloc(connection->env,
