@@ -1,8 +1,46 @@
+commit 237efaa476d92442bde3b9da549dd4422d49ffcf
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2023-04-25
+
+    switch to plain Debug handling for debugging the driver
+    
+    The handling of Ns_LogSqlDebug is performed inside nsdb, including
+    also the printout of (long) SQL statements. Proviously, the driver
+    was too chatty when Debug(sql) was turned on.
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit bb5647b41ce5b185ccf4807c8df1aea0b9b9df83
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2023-04-25
+
+    improve spelling
+
+M	doc/oracle-driver.html
+M	doc/plsql.txt
+M	nsoracle.c
+
+commit 78336e1c0775812d04da7cc22252db079e0e3857
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2022-11-30
+
+    Fixed bug when streaming LOB content to connection
+    
+    The old code did not distinguish between binary and non-binary content.
+    This bug was discussed in
+        https://openacs.org/forums/message-view?message_id=5693661
+    
+    Bumped version number to 2.9
+
+M	nsoracle.c
+M	nsoracle.h
+
 commit a86e827954d7d8c7bdb3e1dfd7633421b92c82a8
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2022-02-20
 
-    Whitespace changes
+    Whitepsace changes
     
     Make code more consistent and follow closer to the conventions in the NaviServer project
 
@@ -387,7 +425,7 @@ commit 2ea7e46bce78cf347a968c00213acd3fd18147a8
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2014-08-30
 
-    - reduce number of compilation warnings from 52 to 9 (mostly warning about losing const property)
+    - reduce number of compilation warnings from 52 to 9 (mostly warning about loosing const property)
 
 M	nsoracle.c
 M	nsoracle.h
@@ -709,7 +747,7 @@ Author: jcollins <jcollins>
 Date:   2004-02-08
 
     * Makefile: Added LDFLAGS, and LIBS variables back to
-      link line so that the driver will compile on macOS.
+      link line so that the driver will compile on Mac OS X.
     
       Added a check to see if we are compiling against AOLserver 4.x
       and if so add -lnsdb to link line.
@@ -790,7 +828,7 @@ commit d3bec32e3ac298123736df37107ba3e7e87929ce
 Author: jcdlondon <jcdlondon>
 Date:   2002-10-08
 
-    Don't flush null connection bug 620469/patch 32645 Matthew Krenzer
+    Dont flush null connection bug 620469/patch 32645 Matthew Krenzer
 
 M	ora8.c
 
