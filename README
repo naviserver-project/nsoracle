@@ -53,20 +53,22 @@ NaviServer Hints:
 
 NOTES:
 
-   The "how-to write an AOLserver driver" docs are at
-   http://www.aolserver.com/server/docs/2.3/html/dr-app.htm
+   The Driver docs are at
+   https://naviserver.sourceforge.io/n/manual/files/c-driverdb.html
 
    The Oracle OCI docs are in Programmer's Guide to the Oracle Call Interface
-   http://oradoc.photo.net/ora8doc/DOC/server803/A54656_01/toc.htm
-
-   The documentation for this driver (including a couple of special Tcl API
-   calls) is at http://www.arsdigita.com/free-tools/oracle-driver.html
+   https://docs.oracle.com/en/database/oracle/oracle-database/19/adobj/oracle-call-interface-oci.html
 
    Config parameters in [ns/db/driver/drivername]:
 
      Debug: boolean (Defaults to off)
         Enable the "log" call so that lots of stuff gets sent to the
         server.log.
+
+     ConvertEncoding: boolean (Defaults to off)
+        Initialize the Oracle interface with OCIEnvNlsCreate() instead of
+        OCIEnvCreate() to guarantee translation of Oracle's charset to
+        UTF-8 (Tcl's internal charset).
 
      MaxStringLogLength: integer (defaults to 1024); -1 implies unlimited
         how much character data to log before just saying [too long]
@@ -77,8 +79,14 @@ NOTES:
         if your Oracle is not using UTF-8, in which case a value of 2 should
         work for any ISO-8859 character set.
 
-   ns_ora clob_dml SQL is logged when verbose=on in the pool's configuration
-   section.
+     LobBufferSize: integer defaulting to 16384
+        Size of memory chunks exchanged with the Oracle Server for Lobs
+
+     PrefetchRows: integer defaulting to 0
+        optional tuning parameter for prefetch operations
+
+     PrefetchMemory: integer defaulting to 0
+        optional tuning parameter for prefetch operations (alternative to PrefetchRows)
 
    To make a "safe" driver (say for servers running with DBA privileges) that
-   only allows SELECT statements, define FOR_CASSANDRACLE when compiling this
+   only allows SELECT statements, define FOR_CASSANDRACLE when compiling this code
