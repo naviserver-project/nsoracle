@@ -8,7 +8,7 @@
  *  Extended 2000      by markd@arsdigita.com, curtisg@arsdigita.com, jsalz@mit.edu,
  *                        jsc@arsdigita.com, mayoff@arsdigita.com
  *  Extended 2002-2004 by Jeremy Collins <jeremy.collins@tclsource.org>
- *  Extended 2014-2022 by Gustaf Neumann (cleanup, NaviServer adjustments)
+ *  Extended 2014-2024 by Gustaf Neumann (cleanup, NaviServer adjustments)
  */
 
 #include "nsoracle.h"
@@ -2675,43 +2675,25 @@ OracleDescribeArguments (OCIDescribe       *UNUSED(descHandlePtr),
 NS_EXPORT Ns_ReturnCode
 Ns_DbDriverInit (const char *hdriver, const char *config_path)
 {
-    int ns_status, config_value;
+    Ns_ReturnCode ns_status;
 
-    /* slurp any nsd.ini configuration parameters first */
-    if (!Ns_ConfigGetBool(config_path, "Debug", &debug_p))
-        debug_p = DEFAULT_DEBUG;
-
+    debug_p = Ns_ConfigBool(config_path, "Debug", DEFAULT_DEBUG);
     convert_encoding_p = Ns_ConfigBool(config_path, "ConvertEncoding", NS_FALSE);
 
-    if (!Ns_ConfigGetInt
-        (config_path, "MaxStringLogLength", &max_string_log_length))
-        max_string_log_length = DEFAULT_MAX_STRING_LOG_LENGTH;
+    max_string_log_length = Ns_ConfigIntRange(config_path, "MaxStringLogLength", 100, INT_MAX,
+                                              DEFAULT_MAX_STRING_LOG_LENGTH);
+    char_expansion = Ns_ConfigIntRange(config_path, "CharExpansion", 1, 4, DEFAULT_CHAR_EXPANSION);
 
-    if (max_string_log_length < 0)
-        max_string_log_length = INT_MAX;
-
-    if (!Ns_ConfigGetInt (config_path, "CharExpansion", &char_expansion))
-         char_expansion = DEFAULT_CHAR_EXPANSION;
-
-    if (Ns_ConfigGetInt(config_path, "LobBufferSize", &config_value)) {
-        lob_buffer_size = (unsigned int)config_value;
-    } else {
-        lob_buffer_size = 16384;
-    }
+    lob_buffer_size = (unsigned int)Ns_ConfigIntRange(config_path, "LobBufferSize", 1, 128000, 16384);
     Ns_Log(Notice, "%s driver LobBufferSize = %d", hdriver, lob_buffer_size);
 
-    if (!Ns_ConfigGetInt(config_path, "PrefetchRows", &prefetch_rows))
-        prefetch_rows = 0;
+    prefetch_rows = Ns_ConfigIntRange(config_path, "PrefetchRows", 0, 1000000, 0);
     Ns_Log(Notice, "%s driver PrefetchRows = %d", hdriver, prefetch_rows);
 
-    if (!Ns_ConfigGetInt(config_path, "PrefetchMemory", &prefetch_memory))
-        prefetch_memory = 0;
-    Ns_Log(Notice, "%s driver PrefetchMemory = %d", hdriver,
-           prefetch_memory);
+    prefetch_memory = Ns_ConfigIntRange(config_path, "PrefetchMemory", 0, INT_MAX, 0);
+    Ns_Log(Notice, "%s driver PrefetchMemory = %d", hdriver, prefetch_memory);
 
-
-    ns_ora_log(lexpos(), "entry (hdriver %p, config_path %s)", hdriver,
-        nilp(config_path));
+    ns_ora_log(lexpos(), "entry (hdriver %p, config_path %s)", hdriver, nilp(config_path));
 
     ns_status = Ns_DbRegisterDriver(hdriver, ora_procs);
     if (ns_status != NS_OK) {
@@ -2754,7 +2736,7 @@ Ns_OracleInterpInit(Tcl_Interp *interp, const void *UNUSED(dummy))
 /*}}}*/
 
 /*{{{ Ns_OracleServerInit */
-static int
+static Ns_ReturnCode
 Ns_OracleServerInit(char *hserver, char *hmodule, char *hdriver)
 {
     ns_ora_log(lexpos(), "entry (%s, %s, %s)", nilp(hserver), nilp(hmodule),
@@ -2811,7 +2793,7 @@ Ns_OracleDbType (Ns_DbHandle *dummy)
  *
  *----------------------------------------------------------------------
  */
-static int
+static Ns_ReturnCode
 Ns_OracleOpenDb (Ns_DbHandle *dbh)
 {
     oci_status_t oci_status;
@@ -2998,7 +2980,7 @@ Ns_OracleOpenDb (Ns_DbHandle *dbh)
  *
  *----------------------------------------------------------------------
  */
-static int
+static Ns_ReturnCode
 Ns_OracleCloseDb (Ns_DbHandle *dbh)
 {
     oci_status_t oci_status;
@@ -3835,7 +3817,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
  *
  *----------------------------------------------------------------------
  */
-static int
+static Ns_ReturnCode
 Ns_OracleFlush (Ns_DbHandle *dbh)
 {
     ora_connection_t *connection;
@@ -3918,7 +3900,7 @@ Ns_OracleFlush (Ns_DbHandle *dbh)
  *
  *----------------------------------------------------------------------
  */
-static int
+static Ns_ReturnCode
 Ns_OracleResetHandle (Ns_DbHandle *dbh)
 {
     ora_connection_t *connection;

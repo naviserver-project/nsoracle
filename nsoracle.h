@@ -187,19 +187,18 @@ typedef struct _string_list_elt {
     struct _string_list_elt *next;
 } string_list_elt_t;
 
-static const char *Ns_OracleName(Ns_DbHandle *dummy);
-static const char *Ns_OracleDbType(Ns_DbHandle *dummy);
-static Ns_Set *Ns_OracleSelect(Ns_DbHandle *dbh, char *sql);
-static Ns_Set *Ns_OracleBindRow(Ns_DbHandle *dbh);
-static int     Ns_OracleOpenDb(Ns_DbHandle *dbh);
-static int     Ns_OracleCloseDb(Ns_DbHandle *dbh);
-static int     Ns_OracleDML(Ns_DbHandle *dbh, char *sql);
-static int     Ns_OracleExec(Ns_DbHandle *dbh, char *sql);
-static int     Ns_OracleGetRow(Ns_DbHandle *dbh, Ns_Set * row);
-static int     Ns_OracleFlush(Ns_DbHandle *dbh);
-static int     Ns_OracleResetHandle(Ns_DbHandle * dbh);
-static int     Ns_OracleServerInit(char *hserver, char *hmodule,
-                                   char *hdriver);
+static const char   *Ns_OracleName(Ns_DbHandle *dummy);
+static const char   *Ns_OracleDbType(Ns_DbHandle *dummy);
+static Ns_Set       *Ns_OracleSelect(Ns_DbHandle *dbh, char *sql);
+static Ns_Set       *Ns_OracleBindRow(Ns_DbHandle *dbh);
+static Ns_ReturnCode Ns_OracleOpenDb(Ns_DbHandle *dbh);
+static Ns_ReturnCode Ns_OracleCloseDb(Ns_DbHandle *dbh);
+static int           Ns_OracleDML(Ns_DbHandle *dbh, char *sql);
+static int           Ns_OracleExec(Ns_DbHandle *dbh, char *sql);
+static int           Ns_OracleGetRow(Ns_DbHandle *dbh, Ns_Set * row);
+static Ns_ReturnCode Ns_OracleFlush(Ns_DbHandle *dbh);
+static Ns_ReturnCode Ns_OracleResetHandle(Ns_DbHandle * dbh);
+static Ns_ReturnCode Ns_OracleServerInit(char *hserver, char *hmodule, char *hdriver);
 
 static Ns_Set *Oracle0or1Row(Tcl_Interp *interp,
                              Ns_DbHandle *handle, Ns_Set *row, int *nrows);
