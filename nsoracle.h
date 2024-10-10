@@ -1,5 +1,5 @@
 
-#define NSORACLE_VERSION       "2.9"
+#define NSORACLE_VERSION       "2.10"
 
 #define STACK_BUFFER_SIZE      20000
 #define EXEC_PLSQL_BUFFER_SIZE 4096
@@ -16,6 +16,15 @@
 #define DEFAULT_CHAR_EXPANSION          1
 
 #include <ns.h>
+#ifndef TCL_INDEX_NONE
+# define TCL_INDEX_NONE       -1
+#endif
+
+#ifndef TCL_SIZE_T
+# define TCL_SIZE_T           int
+#endif
+
+
 #include <oci.h>
 #if 0
 #include <stdlib.h>
@@ -45,8 +54,8 @@
 
 NS_EXPORT int Ns_ModuleVersion = 1;
 
-static char *ora_driver_version = "Oracle Driver version " NSORACLE_VERSION;
-static char *ora_driver_name = "Oracle8";
+static const char *ora_driver_version = "Oracle Driver version " NSORACLE_VERSION;
+static const char *ora_driver_name = "Oracle8";
 
 /*
  *  The OCI lumps a bunch of different things into two C types, sword
@@ -115,8 +124,8 @@ struct fetch_buffer {
     int   inout;
 
     /* support for array DML: the array of values for this bind variable. */
-    int array_count;
-    CONST84 char **array_values;
+    TCL_SIZE_T array_count;
+    const char **array_values;
 
     /* 2-byte signed integer indicating null-ness; if null, value will be -1 */
     sb2 is_null;
@@ -179,8 +188,8 @@ typedef struct _string_list_elt {
     struct _string_list_elt *next;
 } string_list_elt_t;
 
-static char   *Ns_OracleName(Ns_DbHandle *dummy);
-static char   *Ns_OracleDbType(Ns_DbHandle *dummy);
+static const char *Ns_OracleName(Ns_DbHandle *dummy);
+static const char *Ns_OracleDbType(Ns_DbHandle *dummy);
 static Ns_Set *Ns_OracleSelect(Ns_DbHandle *dbh, char *sql);
 static Ns_Set *Ns_OracleBindRow(Ns_DbHandle *dbh);
 static int     Ns_OracleOpenDb(Ns_DbHandle *dbh);
@@ -206,13 +215,13 @@ Tcl_CmdProc
     ora_column_command,
     ora_table_command;
 
-static Ns_DbTableInfo *ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table);
+static Ns_DbTableInfo *ora_get_table_info(Ns_DbHandle * dbh, const char *table);
 static char *ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh,
 			    int system_tables_p);
-static      Ns_DbTableInfo *Ns_DbNewTableInfo(CONST84 char *table);
+static      Ns_DbTableInfo *Ns_DbNewTableInfo(const char *table);
 static void Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo);
 static void Ns_DbAddColumnInfo(Ns_DbTableInfo * tinfo, Ns_Set * column_info);
-static int  Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name);
+static int  Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, const char *name);
 
 #else
 static char *ora_best_row_id(Ns_DString * pds, Ns_DbHandle * dbh,
@@ -244,22 +253,22 @@ enum {
 };
 
 /* Utility functions */
-static void ns_ora_log(const char *file, int line, const char *fn, char *fmt, ...);
-static void error(const char *file, int line, const char *fn, char *fmt, ...);
+static void ns_ora_log(const char *file, int line, const char *fn, const char *fmt, ...);
+static void error(const char *file, int line, const char *fn, const char *fmt, ...);
 static int oci_error_p(const char *file, int line, const char *fn,
-		       Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+		       Ns_DbHandle * dbh, const char *ocifn, const char *query,
 		       oci_status_t oci_status);
 static int tcl_error_p(const char *file, int line, const char *fn, Tcl_Interp * interp,
-	Ns_DbHandle * dbh, char *ocifn, CONST char *query,
+	Ns_DbHandle * dbh, const char *ocifn, const char *query,
 	oci_status_t oci_status);
 static void downcase(char *s);
 static CONST char *nilp(CONST char *s);
 static int stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh,
-			    int rowind, OCILobLocator * lobl, char *path,
+			    int rowind, OCILobLocator * lobl, const char *path,
 			    int to_conn_p, OCISvcCtx * svchp,
 			    OCIError * errhp);
 static int stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh,
-			   int rowind, OCILobLocator * lobl, char *path,
+			   int rowind, OCILobLocator * lobl, const char *path,
 			   ora_connection_t * connection);
 
 static string_list_elt_t * parse_bind_variables(char *input);

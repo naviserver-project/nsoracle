@@ -25,19 +25,19 @@ NS_EXPORT NsDb_DriverInitProc Ns_DbDriverInit;
  */
 
 /*{{{ Ns_OracleMalloc */
-dvoid *Ns_OracleMalloc(dvoid *cxt, size_t size) {
+static dvoid *Ns_OracleMalloc(dvoid *UNUSED(cxt), size_t size) {
     return Ns_Malloc(size);
 }
 /*}}}*/
 
 /*{{{ Ns_OracleRealloc */
-dvoid *Ns_OracleRealloc(dvoid *cxt, dvoid *buf, size_t size) {
+static dvoid *Ns_OracleRealloc(dvoid *UNUSED(cxt), dvoid *buf, size_t size) {
     return Ns_Realloc(buf, size);
 }
 /*}}}*/
 
 /*{{{ Ns_OracleFree */
-void Ns_OracleFree(dvoid *cxt, dvoid *buf) {
+static void Ns_OracleFree(dvoid *UNUSED(cxt), dvoid *buf) {
     Ns_Free(buf);
 }
 /*}}}*/
@@ -52,15 +52,15 @@ void Ns_OracleFree(dvoid *cxt, dvoid *buf) {
  */
 static sb4
 DynamicBindIn(dvoid * ictxp,
-              OCIBind * bindp,
-              ub4 iter,
-              ub4 index,
+              OCIBind * UNUSED(bindp),
+              ub4 UNUSED(iter),
+              ub4 UNUSED(index),
               dvoid ** bufpp,
               ub4 * alenp, ub1 * piecep, dvoid ** indpp)
 {
     fetch_buffer_t   *fbPtr = (fetch_buffer_t *) ictxp;
     ora_connection_t *connection = fbPtr->connection;
-    CONST84 char     *value = NULL;
+    const char     *value = NULL;
 
     if(fbPtr->name != NULL) {
         value = Tcl_GetVar(connection->interp, fbPtr->name, 0);
@@ -89,7 +89,7 @@ DynamicBindIn(dvoid * ictxp,
  *----------------------------------------------------------------------
  */
 static sb4
-DynamicBindOut(dvoid * ctxp, OCIBind * bindp,
+DynamicBindOut(dvoid * ctxp, OCIBind * UNUSED(bindp),
                ub4 iter, ub4 index, dvoid ** bufpp,
                ub4 ** alenpp, ub1 * piecep,
                dvoid ** indpp, ub2 ** rcodepp)
@@ -145,7 +145,7 @@ DynamicBindOut(dvoid * ctxp, OCIBind * bindp,
  *----------------------------------------------------------------------
  */
 int
-OracleObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const* objv)
+OracleObjCmd(ClientData UNUSED(clientData), Tcl_Interp *interp, int objc, Tcl_Obj *const* objv)
 {
     Ns_DbHandle *dbh;
 
@@ -194,7 +194,7 @@ OracleObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const
     }
 
     if (dbh->connection == NULL) {
-        Tcl_SetResult(interp, "error: no connection", NULL);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("error: no connection", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
 
@@ -304,7 +304,7 @@ OraclePLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh
     string_list_elt_t *bind_variables,
                       *var_p;
     char              *query;
-    char              *ref;
+    const char        *ref;
     int                i, refcursor_count = 0;
 
     if (objc < 4) {
@@ -354,9 +354,9 @@ OraclePLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh
          var_p = var_p->next, i++) {
 
         fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
-        CONST84 char *value;
+        const char *value;
 
-        fetchbuf->type = -1;
+        fetchbuf->type = (OCITypeCode)-1;
 
         value = Tcl_GetVar(interp, var_p->string, 0);
         fetchbuf->name = var_p->string;
@@ -376,8 +376,8 @@ OraclePLSQL(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh
             /* Handle REF CURSOR */
 
             if (refcursor_count == 1) {
-                Tcl_SetResult(interp, " invalid plsql statement, you\
-                        can only have a single ref cursors. ", TCL_STATIC);
+                Tcl_SetObjResult(interp, Tcl_NewStringObj("invalid plsql statement, you"
+                        " can only have a single ref cursors. ", TCL_INDEX_NONE));
                 return TCL_ERROR;
             } else {
                 refcursor_count = 1;
@@ -728,10 +728,10 @@ OracleExecPLSQLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHan
 
     for (var_p = bind_variables, i=0; var_p != NULL; var_p = var_p->next, i++) {
         fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
-        CONST84 char   *value = NULL;
-        int             index;
+        const char   *value = NULL;
+        long            index;
 
-        fetchbuf->type = -1;
+        fetchbuf->type = (OCITypeCode)-1;
         index = strtol(var_p->string, &nbuf, 10);
 
         if (*nbuf == '\0') {
@@ -917,7 +917,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
     connection = dbh->connection;
 
     if (!connection) {
-        Tcl_SetResult(interp, "error: no connection", NULL);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("error: no connection", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     connection->interp = interp;
@@ -1085,10 +1085,11 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
 
         fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
         char *nbuf;
-        CONST84 char *value = NULL;
-        int index;  unsigned int max_length = 0;
+        const char *value = NULL;
+        long  index;
+        size_t max_length = 0;
 
-        fetchbuf->type = -1;
+        fetchbuf->type = (OCITypeCode)-1;
         index = strtol(var_p->string, &nbuf, 10);
 
         /* Depending on how this proc was called we will get
@@ -1179,7 +1180,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
              */
 
             if (i == 0) {
-                iters = fetchbuf->array_count;
+                iters = (ub4)fetchbuf->array_count;
             } else {
 
                 if ((int) iters != fetchbuf->array_count) {
@@ -1222,10 +1223,8 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
                                        (const OraText *)var_p->string,
                                        (sb4) strlen(var_p->string),
                                        NULL,
-                                       array_p ? max_length :
-                                                fetchbuf->fetch_length,
-                                       array_p ? SQLT_CHR :
-                                                 SQLT_STR,
+                                       array_p ? (sb4)max_length : fetchbuf->fetch_length,
+                                       array_p ? SQLT_CHR : SQLT_STR,
                                        0, 0, 0, 0, 0,
                                        OCI_DATA_AT_EXEC);
         } else {
@@ -1351,7 +1350,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
     } else {
 
         Ns_Set *setPtr;
-        int dynamic_p = 0;
+        Ns_TclSetType dynamic = NS_TCL_SET_STATIC;
 
         ns_ora_log(lexpos(), "ns_ora dml:  doing bind for select");
         Ns_SetTrunc(dbh->row, 0);
@@ -1363,7 +1362,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
             int nrows;
 
             row = Oracle0or1Row(interp, dbh, setPtr, &nrows);
-            dynamic_p = 1;
+            dynamic = NS_TCL_SET_DYNAMIC;
 
             if (row != NULL) {
                 if (!strcmp(subcommand, "1row") && nrows != 1) {
@@ -1389,7 +1388,7 @@ OracleSelect(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
         }
 
         if (setPtr != NULL)
-            Ns_TclEnterSet(interp, setPtr, dynamic_p);
+            Ns_TclEnterSet(interp, setPtr, dynamic);
     }
 
     return TCL_OK;
@@ -1469,7 +1468,8 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
     oci_status_t       oci_status;
     ora_connection_t  *connection;
     char              *query;
-    int                i,k;
+    sb4                k;
+    sb4                colNum;
     int                files_p = NS_FALSE;
     int                blob_p = NS_FALSE;
 
@@ -1519,10 +1519,10 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
     connection->n_columns = objc - 4;
 
     if (files_p) {
-        for (i = 0; i < connection->n_columns; i++) {
-            if (access(Tcl_GetString(data[i]), R_OK) != 0) {
+        for (colNum = 0; colNum < connection->n_columns; colNum++) {
+            if (access(Tcl_GetString(data[colNum]), R_OK) != 0) {
                 Tcl_AppendResult(interp, "could not access file",
-                        Tcl_GetString(data[i]), (char*)0L);
+                        Tcl_GetString(data[colNum]), (char*)0L);
                 Ns_OracleFlush(dbh);
                 return TCL_ERROR;
             }
@@ -1531,15 +1531,15 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
 
     malloc_fetch_buffers(connection);
 
-    for (i = 0; i < connection->n_columns; i++) {
-        fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
+    for (colNum = 0; colNum < connection->n_columns; colNum++) {
+        fetch_buffer_t *fetchbuf = &connection->fetch_buffers[colNum];
 
-        fetchbuf->type = -1;
+        fetchbuf->type = (OCITypeCode)-1;
 
         oci_status = OCIBindByPos(connection->stmt,
                                   &fetchbuf->bind,
                                   connection->err,
-                                  i + 1,
+                                  (ub4)colNum + 1,
                                   0,
                                   -1,
                                   (blob_p) ? SQLT_BLOB : SQLT_CLOB,
@@ -1569,19 +1569,18 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
     }
 
 
-    for (i = 0; i < connection->n_columns; i++) {
-        fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
-
-        ub4 length = -1;
+    for (colNum = 0; colNum < connection->n_columns; colNum++) {
+        fetch_buffer_t *fetchbuf = &connection->fetch_buffers[colNum];
+        ub4 length = (ub4)-1;
 
         if (files_p) {
-            Ns_Log(Debug, "  CLOB # %d, filename %s", i,
-                   Tcl_GetString(data[i]));
+            Ns_Log(Debug, "  CLOB # %d, filename %s", colNum,
+                   Tcl_GetString(data[colNum]));
         } else {
-            length = (ub4) strlen(Tcl_GetString(data[i]));
-            Ns_Log(Debug, "  CLOB # %d, length %d: %s", i, length,
+            length = (ub4) strlen(Tcl_GetString(data[colNum]));
+            Ns_Log(Debug, "  CLOB # %d, length %d: %s", colNum, length,
                    (length == 0) ? "(NULL)" :
-                   Tcl_GetString(data[i]));
+                   Tcl_GetString(data[colNum]));
         }
 
         /* if length is zero, that's an empty string.  Bypass the LobWrite
@@ -1590,10 +1589,10 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
         if (length == 0)
             continue;
 
-        for (k = 0; k < (int) fetchbuf->n_rows; k++) {
+        for (k = 0; k < (sb4)fetchbuf->n_rows; k++) {
             if (files_p) {
                 if (stream_read_lob
-                    (interp, dbh, 1, fetchbuf->lobs[k], Tcl_GetString(data[i]),
+                    (interp, dbh, 1, fetchbuf->lobs[k], Tcl_GetString(data[colNum]),
                      connection)
                     != NS_OK) {
                     tcl_error_p(lexpos(), interp, dbh, "stream_read_lob",
@@ -1608,7 +1607,7 @@ OracleLobDML(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *db
                                      fetchbuf->lobs[k],
                                      &length,
                                      1,
-                                     Tcl_GetString(data[i]),
+                                     Tcl_GetString(data[colNum]),
                                      length,
                                      OCI_ONE_PIECE, 0, 0, 0,
                                      SQLCS_IMPLICIT);
@@ -1668,7 +1667,7 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
     int                files_p = NS_FALSE;
     int                blob_p = NS_FALSE;
     const char       **lob_argv;
-    int                lob_argc;
+    TCL_SIZE_T         lob_argc;
     int                argv_base;
 
     if (objc < 5) {
@@ -1732,10 +1731,11 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
 
         fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
         char           *nbuf;
-        CONST84 char   *value = NULL;
-        int             index, lob_i;
+        const char   *value = NULL;
+        int             lob_i;
+        long            index;
 
-        fetchbuf->type = -1;
+        fetchbuf->type = (OCITypeCode)-1;
         index = strtol(var_p->string, &nbuf, 10);
         if (*nbuf == '\0') {
             /* It was a valid number.
@@ -1845,7 +1845,7 @@ OracleLobDMLBind(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle
          var_p = var_p->next, i++) {
 
         fetch_buffer_t *fetchbuf = &connection->fetch_buffers[i];
-        ub4             length = -1;
+        ub4             length = (ub4)-1;
 
         if (!fetchbuf->is_lob) {
             ns_ora_log(lexpos(), "column %d is not a lob", i);
@@ -2163,12 +2163,13 @@ OracleGetCols(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *d
         char *name1 = 0;
         ub2 coltype;
         ub4 name1_size = 0;
+        sword result;
 
-        oci_status = OCIParamGet(connection->stmt,
+        result = OCIParamGet(connection->stmt,
                                  OCI_HTYPE_STMT,
                                  connection->err,
-                                 (oci_param_t *) & param, i + 1);
-        if (oci_error_p(lexpos(), dbh, "OCIParamGet", 0, oci_status)) {
+                             (oci_param_t *) & param, (ub4)i + 1);
+        if (oci_error_p(lexpos(), dbh, "OCIParamGet", 0, result)) {
             Ns_OracleFlush(dbh);
             return TCL_ERROR;
         }
@@ -2201,10 +2202,10 @@ OracleGetCols(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *d
         downcase(name);
 
         Tcl_ListObjAppendElement(interp,
-                Tcl_GetObjResult(interp), Tcl_NewIntObj(coltype));
+                                 Tcl_GetObjResult(interp), Tcl_NewIntObj(coltype));
 
         Tcl_ListObjAppendElement(interp,
-                Tcl_GetObjResult(interp), Tcl_NewStringObj(name, name1_size));
+                                 Tcl_GetObjResult(interp), Tcl_NewStringObj(name, (TCL_SIZE_T)name1_size));
 
     }
 
@@ -2297,7 +2298,7 @@ OracleDesc(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 
     connection = dbh->connection;
     if (connection == NULL) {
-        Tcl_SetResult(interp, "error: no connection", NULL);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("error: no connection", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
 
@@ -2465,7 +2466,7 @@ OracleDesc(Tcl_Interp *interp, int objc, Tcl_Obj *const* objv, Ns_DbHandle *dbh)
 
 /*{{{ OracleDescribeSynonym */
 void
-OracleDescribeSynonym(OCIDescribe *descHandlePtr,
+OracleDescribeSynonym(OCIDescribe *UNUSED(descHandlePtr),
                       OCIParam    *paramHandlePtr,
                       ora_connection_t *connection,
                       Ns_DbHandle *dbh,
@@ -2497,8 +2498,10 @@ OracleDescribeSynonym(OCIDescribe *descHandlePtr,
         return;
     }
 
-    Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp), Tcl_NewStringObj(syn_schema, syn_schema_len));
-    Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp), Tcl_NewStringObj(syn_name, syn_name_len));
+    Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
+                             Tcl_NewStringObj(syn_schema, (TCL_SIZE_T)syn_schema_len));
+    Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
+                             Tcl_NewStringObj(syn_name, (TCL_SIZE_T)syn_name_len));
 
 }
 /*}}}*/
@@ -2509,7 +2512,7 @@ OracleDescribePackage(OCIDescribe      *descHandlePtr,
                       OCIParam         *paramHandlePtr,
                       ora_connection_t *connection,
                       Ns_DbHandle      *dbh,
-                      char             *package,
+                      char             *UNUSED(package),
                       Tcl_Interp       *interp)
 {
     OCIParam     *procListPtr, *arg, *arg1;
@@ -2539,7 +2542,7 @@ OracleDescribePackage(OCIDescribe      *descHandlePtr,
         OCIAttrGet (arg, OCI_DTYPE_PARAM, &name, &namelen, OCI_ATTR_NAME, connection->err);
         OCIAttrGet (arg, OCI_DTYPE_PARAM, &arg1, 0, OCI_ATTR_LIST_ARGUMENTS, connection->err);
 
-        Tcl_ListObjAppendElement(interp, procObj, Tcl_NewStringObj(name, namelen));
+        Tcl_ListObjAppendElement(interp, procObj, Tcl_NewStringObj(name, (TCL_SIZE_T)namelen));
 
         OracleDescribeArguments(descHandlePtr, arg1, connection, dbh, interp, procObj);
     }
@@ -2549,7 +2552,7 @@ OracleDescribePackage(OCIDescribe      *descHandlePtr,
 
 /*{{{ OracleDescribeArguments */
 void
-OracleDescribeArguments (OCIDescribe       *descHandlePtr,
+OracleDescribeArguments (OCIDescribe       *UNUSED(descHandlePtr),
                          OCIParam          *paramHandlePtr,
                          ora_connection_t  *connection,
                          Ns_DbHandle       *dbh,
@@ -2565,7 +2568,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
     ub2               numargs;
     ub4               namelen;
     const char       *name;
-    int               i;
+    ub4               i;
     Tcl_Obj          *argObj = Tcl_NewObj();
 
     oci_status = OCIAttrGet (paramHandlePtr, OCI_DTYPE_PARAM, &numargs, 0, OCI_ATTR_NUM_PARAMS, connection->err);
@@ -2589,7 +2592,7 @@ OracleDescribeArguments (OCIDescribe       *descHandlePtr,
         OCIAttrGet (arg, OCI_DTYPE_PARAM, &data_type, 0, OCI_ATTR_DATA_TYPE, connection->err);
         OCIAttrGet (arg, OCI_DTYPE_PARAM, &has_default, 0, OCI_ATTR_HAS_DEFAULT, connection->err);
 
-        Tcl_ListObjAppendElement(interp, argument, Tcl_NewStringObj(name, namelen));
+        Tcl_ListObjAppendElement(interp, argument, Tcl_NewStringObj(name, (TCL_SIZE_T)namelen));
 
         switch ((int)mode) {
             case OCI_TYPEPARAM_IN:
@@ -2733,7 +2736,7 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
 
 /*{{{ Ns_OracleInterpInit */
 static int
-Ns_OracleInterpInit(Tcl_Interp *interp, const void *dummy)
+Ns_OracleInterpInit(Tcl_Interp *interp, const void *UNUSED(dummy))
 {
     Tcl_CreateObjCommand (interp, "ns_ora", OracleObjCmd,
             (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
@@ -2769,7 +2772,7 @@ Ns_OracleServerInit(char *hserver, char *hmodule, char *hdriver)
  *
  *----------------------------------------------------------------------
  */
-static char *
+static const char *
 Ns_OracleName (Ns_DbHandle *dummy)
 {
     ns_ora_log(lexpos(), "entry (dummy %p)", dummy);
@@ -2789,7 +2792,7 @@ Ns_OracleName (Ns_DbHandle *dummy)
  *
  *----------------------------------------------------------------------
  */
-static char *
+static const char *
 Ns_OracleDbType (Ns_DbHandle *dummy)
 {
     ns_ora_log(lexpos(), "entry (dummy %p)", dummy);
@@ -3341,7 +3344,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
         oci_status = OCIParamGet(connection->stmt,
                                  OCI_HTYPE_STMT,
                                  connection->err,
-                                 (oci_param_t *) & param, i + 1);
+                                 (oci_param_t *) & param, (ub4)i + 1);
         if (oci_error_p(lexpos(), dbh, "OCIParamGet", 0, oci_status)) {
             Ns_OracleFlush(dbh);
             return 0;
@@ -3474,7 +3477,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
                 fetchbuf->buf_size = fetchbuf->size + 8;
             }
 
-            fetchbuf->buf_size *= char_expansion;
+            fetchbuf->buf_size *= (unsigned int)char_expansion;
             fetchbuf->buf = Ns_Malloc (fetchbuf->buf_size);
 
             break;
@@ -3515,7 +3518,7 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
             oci_status = OCIDefineByPos(connection->stmt,
                                         &fetchbuf->def,
                                         connection->err,
-                                        i + 1,
+                                        (ub4)i + 1,
                                         &fetchbuf->lob,
                                         -1,
                                         fetchbuf->type,
@@ -3531,9 +3534,9 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
             oci_status = OCIDefineByPos(connection->stmt,
                                         &fetchbuf->def,
                                         connection->err,
-                                        i + 1,
+                                        (ub4)i + 1,
                                         0,
-                                        (sb4) SB4MAXVAL,
+                                        (sb4)SB4MAXVAL,
                                         fetchbuf->type,
                                         &fetchbuf->is_null,
                                         &fetchbuf->fetch_length,
@@ -3551,9 +3554,9 @@ Ns_OracleBindRow (Ns_DbHandle *dbh)
             oci_status = OCIDefineByPos(connection->stmt,
                                         &fetchbuf->def,
                                         connection->err,
-                                        i + 1,
+                                        (ub4)i + 1,
                                         fetchbuf->buf,
-                                        fetchbuf->buf_size,
+                                        (sb4)fetchbuf->buf_size,
                                         SQLT_STR,
                                         &fetchbuf->is_null,
                                         &fetchbuf->fetch_length,
@@ -3647,7 +3650,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
         case OCI_TYPECODE_BLOB:
 
             if (fetchbuf->is_null == -1) {
-                Ns_SetPutValue(row, i, "");
+                Ns_SetPutValue(row, (size_t)i, "");
             } else if (fetchbuf->is_null != 0) {
                 error(lexpos(), "invalid fetch buffer is_null");
                 Ns_OracleFlush(dbh);
@@ -3695,7 +3698,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
                     return NS_ERROR;
                 }
 
-                Ns_SetPutValue(row, i, Ns_DStringValue(&retval));
+                Ns_SetPutValue(row, (size_t)i, Ns_DStringValue(&retval));
                 Ns_DStringFree(&retval);
                 Ns_Free(bufp);
             }
@@ -3796,7 +3799,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
             ns_ora_log(lexpos(), "LONG done: status=%d buf_size=%d fetched=%d\n",
                 oci_status, fetchbuf->buf_size, fetchbuf->fetch_length);
 
-            Ns_SetPutValue(row, i, fetchbuf->buf);
+            Ns_SetPutValue(row, (size_t)i, fetchbuf->buf);
 
             break;
 
@@ -3811,7 +3814,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
             } else
                 fetchbuf->buf[fetchbuf->fetch_length] = 0;
 
-            Ns_SetPutValue(row, i, fetchbuf->buf);
+            Ns_SetPutValue(row, (size_t)i, fetchbuf->buf);
 
             break;
         }
@@ -4004,36 +4007,36 @@ static string_list_elt_t *
 parse_bind_variables(char *input)
 {
     char *p, lastchar;
-    enum { base, instr, bind } state;
+    enum { base_state, instr_state, bind_state } state;
     char bindbuf[1024], *bp = bindbuf;
     string_list_elt_t *elt, *head = 0, *tail = 0;
     int current_string_length = 0;
 
-    for (p = input, state = base, lastchar = '\0'; *p != '\0';
+    for (p = input, state = base_state, lastchar = '\0'; *p != '\0';
          lastchar = *p, p++) {
 
         switch (state) {
-        case base:
+        case base_state:
             if (*p == '\'') {
-                state = instr;
+                state = instr_state;
                 current_string_length = 0;
             } else if (*p == ':') {
                 bp = bindbuf;
-                state = bind;
+                state = bind_state;
             }
             break;
 
-        case instr:
+        case instr_state:
             if (*p == '\''
                 && (lastchar != '\'' || current_string_length == 0)) {
-                state = base;
+                state = base_state;
             }
             current_string_length++;
             break;
 
-        case bind:
+        case bind_state:
             if (*p == '=') {
-                state = base;
+                state = base_state;
                 bp = bindbuf;
             } else if (!
                        (*p == '_' || *p == '$' || *p == '#'
@@ -4046,7 +4049,7 @@ parse_bind_variables(char *input)
                     tail->next = elt;
                     tail = elt;
                 }
-                state = base;
+                state = base_state;
                 p--;
             } else {
                 *bp++ = *p;
@@ -4055,7 +4058,7 @@ parse_bind_variables(char *input)
         }
     }
 
-    if (state == bind) {
+    if (state == bind_state) {
         *bp = '\0';
         elt = string_list_elt_new(Ns_StrDup(bindbuf));
         if (tail == 0) {
@@ -4075,7 +4078,7 @@ static void
 downcase(char *s)
 {
     for (; *s; s++)
-        *s = tolower(*s);
+        *s = (char)tolower(*s);
 }
 /*}}}*/
 
@@ -4169,7 +4172,7 @@ static int allow_sql_p(Ns_DbHandle * dbh, char *sql, int display_sql_p)
 */
 static int
 oci_error_p(const char *file, int line, const char *fn,
-            Ns_DbHandle *dbh, char *ocifn, const char *query,
+            Ns_DbHandle *dbh, const char *ocifn, const char *query,
             oci_status_t oci_status)
 {
     ora_connection_t *connection = 0;
@@ -4329,7 +4332,7 @@ oci_error_p(const char *file, int line, const char *fn,
 static int
 tcl_error_p(const char *file, int line, const char *fn,
             Tcl_Interp *interp,
-            Ns_DbHandle *dbh, char *ocifn, const char *query,
+            Ns_DbHandle *dbh, const char *ocifn, const char *query,
             oci_status_t oci_status)
 {
     char *msgbuf;
@@ -4440,7 +4443,7 @@ tcl_error_p(const char *file, int line, const char *fn,
  * Oracle unhappiness.
  */
 static void
-error(const char *file, int line, const char *fn, char *fmt, ...)
+error(const char *file, int line, const char *fn, const char *fmt, ...)
 {
     char *buf1;
     char *buf;
@@ -4467,7 +4470,7 @@ error(const char *file, int line, const char *fn, char *fmt, ...)
  *  debug in the [ns/db/driver/drivername] section of your nsd.ini
  */
 static void
-ns_ora_log(const char *file, int line, const char *fn, char *fmt, ...)
+ns_ora_log(const char *file, int line, const char *fn, const char *fmt, ...)
 {
     char   *buf, *buf1;
     va_list ap;
@@ -4504,7 +4507,7 @@ malloc_fetch_buffers(ora_connection_t * connection)
     int i;
 
     connection->fetch_buffers =
-        Ns_Malloc(connection->n_columns *
+        Ns_Malloc((size_t)connection->n_columns *
                   sizeof *connection->fetch_buffers);
 
     for (i = 0; i < connection->n_columns; i++) {
@@ -4680,7 +4683,7 @@ ora_append_buf_to_dstring(dvoid * ctxp, const dvoid *bufp, ub4 len,
         case OCI_LAST_PIECE:
         case OCI_FIRST_PIECE:
         case OCI_NEXT_PIECE:
-            Ns_DStringNAppend(retval, (char *) bufp, len);
+            Ns_DStringNAppend(retval, (char *) bufp, (TCL_SIZE_T)len);
             return OCI_CONTINUE;
 
         default:
@@ -4699,9 +4702,9 @@ ora_append_buf_to_dstring(dvoid * ctxp, const dvoid *bufp, ub4 len,
  */
 
 static sb4
-no_data(dvoid * ctxp, OCIBind * bindp,
-        ub4 iter, ub4 index, dvoid ** bufpp, ub4 * alenpp, ub1 * piecep,
-        dvoid ** indpp)
+no_data(dvoid *UNUSED(ctxp), OCIBind *UNUSED(bindp),
+        ub4 UNUSED(iter), ub4 UNUSED(index), dvoid **bufpp, ub4 *alenpp, ub1 *piecep,
+        dvoid **indpp)
 {
     ns_ora_log(lexpos(), "entry");
 
@@ -4720,14 +4723,14 @@ no_data(dvoid * ctxp, OCIBind * bindp,
    of the context pointer taken as an array of strings (char**). */
 static sb4
 list_element_put_data(dvoid * ictxp,
-                      OCIBind * bindp,
+                      OCIBind * UNUSED(bindp),
                       ub4 iter,
-                      ub4 index,
+                      ub4 UNUSED(index),
                       dvoid ** bufpp,
                       ub4 * alenp, ub1 * piecep, dvoid ** indpp)
 {
     fetch_buffer_t *fetchbuf = ictxp;
-    CONST84 char **elements = fetchbuf->array_values;
+    const char **elements = fetchbuf->array_values;
 
     *bufpp = (dvoid *)elements[iter];
     *alenp = (ub4) strlen(elements[iter]);
@@ -4806,8 +4809,8 @@ get_data(dvoid * ctxp, OCIBind * bindp,
    guide.
  */
 static int
-stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
-                OCILobLocator * lobl, char *path,
+stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int UNUSED(rowind),
+                OCILobLocator * lobl, const char *path,
                 ora_connection_t * connection)
 {
     ub4 offset = 1;
@@ -4815,9 +4818,9 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     ub1 *bufp = NULL;
     ub4 amtp;
     ub1 piece;
-    ub4 nbytes;
+    size_t nbytes;
     ub4 remainder;
-    ub4 filelen = 0;
+    off_t filelen = 0;
 #ifdef WIN32
     int readlen;
 #else
@@ -4847,7 +4850,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     }
     filelen = statbuf.st_size;
 
-    remainder = amtp = filelen;
+    remainder = amtp = (ub4)filelen;
 
     ns_ora_log(lexpos(), "to do streamed write lob, amount = %d", (int) filelen);
 
@@ -4863,7 +4866,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     if (filelen > lob_buffer_size)
         nbytes = lob_buffer_size;
     else
-        nbytes = filelen;
+        nbytes = (size_t)filelen;
 
     bufp = (ub1 *) Ns_Malloc(lob_buffer_size);
     readlen = read(fd, bufp, nbytes);
@@ -4887,7 +4890,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                                      &amtp,
                                      offset,
                                      bufp,
-                                     readlen,
+                                     (ub4)readlen,
                                      OCI_ONE_PIECE, 0, 0, 0,
                                      SQLCS_IMPLICIT);
             if (tcl_error_p(lexpos(), interp, dbh, "OCILobWrite", 0, oci_status)) {
@@ -4939,7 +4942,7 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                                      &amtp,
                                      offset,
                                      bufp,
-                                     readlen,
+                                     (ub4)readlen,
                                      piece, 0, 0, 0, SQLCS_IMPLICIT);
             if (oci_status != OCI_NEED_DATA
                 && tcl_error_p(lexpos(), interp, dbh, "OCILobWrite", 0,
@@ -4977,11 +4980,11 @@ stream_read_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
 /*}}}*/
 
 /*{{{ stream_actually_write*/
-static int
-stream_actually_write(int fd, Ns_Conn * conn, void *bufp, int length,
+static ssize_t
+stream_actually_write(int fd, Ns_Conn * conn, void *bufp, size_t length,
                       int to_conn_p)
 {
-    int bytes_written = 0;
+    ssize_t bytes_written = 0;
 
     ns_ora_log(lexpos(), "entry (%d, %d, %d)", fd, length, to_conn_p);
 
@@ -4999,7 +5002,7 @@ stream_actually_write(int fd, Ns_Conn * conn, void *bufp, int length,
         }
 
         if (status == NS_OK) {
-            bytes_written = length;
+            bytes_written = (ssize_t)length;
         } else {
             bytes_written = 0;
         }
@@ -5022,8 +5025,8 @@ stream_actually_write(int fd, Ns_Conn * conn, void *bufp, int length,
    guide.
 */
 static int
-stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
-                 OCILobLocator * lobl, char *path, int to_conn_p,
+stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int UNUSED(rowind),
+                 OCILobLocator * lobl, const char *path, int to_conn_p,
                  OCISvcCtx * svchp, OCIError * errhp)
 {
     ub4 offset = 1;
@@ -5033,7 +5036,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
     ub4 piece = 0;
     ub4 remainder;              /* the number of bytes for the last piece */
     int fd = 0;
-    int bytes_to_write, bytes_written;
+    ssize_t bytes_to_write, bytes_written;
     int status = STREAM_WRITE_LOB_ERROR;
     oci_status_t oci_status;
     Ns_Conn *conn = NULL;
@@ -5111,7 +5114,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                 goto bailout;
             } else {
                 Ns_Log(Error,
-                       "%s:%d:%s error writing %s.  incomplete write of %d out of %d",
+                       "%s:%d:%s error writing %s.  incomplete write of %ld out of %d",
                        lexpos(), path, bytes_written, loblen);
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
@@ -5146,7 +5149,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                 goto bailout;
             } else {
                 Ns_Log(Error,
-                       "%s:%d:%s error writing %s.  incomplete write of %d out of %d",
+                       "%s:%d:%s error writing %s.  incomplete write of %ld out of %d",
                        lexpos(), path, bytes_written, lob_buffer_size);
                 Tcl_AppendResult(interp, "can't write ", path,
                                  " received error ", strerror(errno),
@@ -5187,7 +5190,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
             }
 
             bytes_written =
-                stream_actually_write(fd, conn, bufp, bytes_to_write,
+                stream_actually_write(fd, conn, bufp, (size_t)bytes_to_write,
                                       to_conn_p);
 
             if (bytes_written != bytes_to_write) {
@@ -5210,7 +5213,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
                                          strerror(errno), (char*)0L);
                     } else {
                         Ns_Log(Error,
-                               "%s:%d:%s error writing %s.  incomplete write of %d out of %d",
+                               "%s:%d:%s error writing %s.  incomplete write of %ld out of %ld",
                                lexpos(), path, bytes_written,
                                bytes_to_write);
                         Tcl_AppendResult(interp, "can't write ", path,
@@ -5256,7 +5259,7 @@ stream_write_lob(Tcl_Interp * interp, Ns_DbHandle * dbh, int rowind,
    useful for the /NS/Db pages
 */
 static Ns_DbTableInfo *
-ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
+ora_get_table_info(Ns_DbHandle * dbh, const char *table) {
 #define SQL_BUFFER_SIZE 1024
     oci_status_t oci_status;
     ora_connection_t *connection;
@@ -5330,7 +5333,7 @@ ora_get_table_info(Ns_DbHandle * dbh, CONST84 char *table) {
         oci_status = OCIParamGet(stmt,
                                  OCI_HTYPE_STMT,
                                  connection->err,
-                                 (oci_param_t *) & param, i + 1);
+                                 (oci_param_t *) & param, (ub4)i + 1);
         if (oci_error_p(lexpos(), dbh, "OCIParamGet", sql, oci_status))
             return 0;
 
@@ -5453,7 +5456,7 @@ ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
 {
     oci_status_t oci_status;
     ora_connection_t *connection;
-    char *sql = 0;
+    const char *sql = NULL;
     OCIStmt *stmt = NULL;
 
     OCIDefine *table_name_def;
@@ -5613,7 +5616,7 @@ static char
  */
 static int
 ora_get_column_index(Tcl_Interp * interp, Ns_DbTableInfo * tinfo,
-                     CONST84 char *indexStr, int *index)
+                     const char *indexStr, int *index)
 {
     int result = TCL_ERROR;
 
@@ -5641,8 +5644,8 @@ ora_get_column_index(Tcl_Interp * interp, Ns_DbTableInfo * tinfo,
 /*{{{ ora_column_command */
 /* re-implement the ns_column command */
 int
-ora_column_command(ClientData dummy, Tcl_Interp * interp,
-        int argc, CONST84 char *argv[])
+ora_column_command(ClientData UNUSED(cd), Tcl_Interp *interp,
+        int argc, const char *argv[])
 {
     int result = TCL_ERROR;
     Ns_DbHandle *handle;
@@ -5684,9 +5687,9 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         }
         colindex = Ns_DbColumnIndex(tinfo, argv[4]);
         if (colindex < 0) {
-            Tcl_SetResult(interp, "0", TCL_STATIC);
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
         } else {
-            Tcl_SetResult(interp, "1", TCL_STATIC);
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(1));
         }
     } else if (!strcmp(argv[1], "name")) {
         if (argc != 5) {
@@ -5710,7 +5713,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
         }
         colindex = Ns_DbColumnIndex(tinfo, argv[4]);
         if (colindex < 0) {
-            Tcl_SetResult(interp, NULL, TCL_VOLATILE);
+            Tcl_ResetResult(interp);
         } else {
             Tcl_SetObjResult(interp,
                              Tcl_NewStringObj(Ns_SetGet(tinfo->columns[colindex], "type"), -1));
@@ -5727,7 +5730,7 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
             goto bailout;
         }
         if (colindex < 0) {
-            Tcl_SetResult(interp, NULL, TCL_VOLATILE);
+            Tcl_ResetResult(interp);
         } else {
             Tcl_SetObjResult(interp,
                              Tcl_NewStringObj(Ns_SetGet(tinfo->columns[colindex], "type"), -1));
@@ -5764,8 +5767,8 @@ ora_column_command(ClientData dummy, Tcl_Interp * interp,
 /*{{{ ora_table_command */
 /* re-implement the ns_table command */
 int
-ora_table_command(ClientData dummy, Tcl_Interp * interp,
-        int argc, CONST84 char *argv[])
+ora_table_command(ClientData UNUSED(cd), Tcl_Interp *interp,
+        int argc, const char *argv[])
 {
     int result = TCL_ERROR;
     Ns_DString tables_string;
@@ -5817,9 +5820,9 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
         Ns_DStringFree(&tables_string);
 
         if (exists_p) {
-            Tcl_SetResult(interp, "1", TCL_STATIC);
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(1));
         } else {
-            Tcl_SetResult(interp, "0", TCL_STATIC);
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
         }
 
     } else if (!strncmp(argv[1], "list", 4)) {
@@ -5871,7 +5874,7 @@ ora_table_command(ClientData dummy, Tcl_Interp * interp,
 
 /*{{{ Ns_DbTableInfo */
 static Ns_DbTableInfo *
-Ns_DbNewTableInfo(CONST84 char *table)
+Ns_DbNewTableInfo(const char *table)
 {
     Ns_DbTableInfo *tinfo;
 
@@ -5880,7 +5883,7 @@ Ns_DbNewTableInfo(CONST84 char *table)
     tinfo->table = Ns_SetCreate(table);
     tinfo->ncolumns = 0;
     tinfo->size = 5;
-    tinfo->columns = Ns_Malloc(sizeof(Ns_Set *) * tinfo->size);
+    tinfo->columns = Ns_Malloc(sizeof(Ns_Set *) * (size_t)tinfo->size);
 
     return (tinfo);
 
@@ -5896,7 +5899,7 @@ Ns_DbAddColumnInfo(Ns_DbTableInfo * tinfo, Ns_Set * column_info)
     if (tinfo->ncolumns > tinfo->size) {
         tinfo->size *= 2;
         tinfo->columns = Ns_Realloc(tinfo->columns,
-                                    tinfo->size * sizeof(Ns_Set *));
+                                    (size_t)tinfo->size * sizeof(Ns_Set *));
     }
     tinfo->columns[tinfo->ncolumns - 1] = column_info;
 
@@ -5923,7 +5926,7 @@ Ns_DbFreeTableInfo(Ns_DbTableInfo * tinfo)
 
 /*{{{ Ns_DbColumnIndex */
 static int
-Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, CONST84 char *name)
+Ns_DbColumnIndex(Ns_DbTableInfo * tinfo, const char *name)
 {
     int i;
     int result = -1;
