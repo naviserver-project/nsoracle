@@ -3643,7 +3643,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
                    character sets, a single character can be many bytes long
                    (in UTF8, up to six). */
                 ub4 lob_length = 0;
-                Ns_DString retval;
+                Tcl_DString retval;
                 ub1 *bufp;
 
                 /* Get length of LOB, in characters for CLOBs and bytes
@@ -3659,7 +3659,7 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
 
                 /* Initialize the buffer we're going to use for the value. */
                 bufp = (ub1 *) Ns_Malloc(lob_buffer_size);
-                Ns_DStringInit(&retval);
+                Tcl_DStringInit(&retval);
 
                 /* Do the read. */
                 oci_status = OCILobRead(connection->svc,
@@ -3675,13 +3675,13 @@ Ns_OracleGetRow (Ns_DbHandle *dbh, Ns_Set *row)
 
                 if (oci_error_p(lexpos(), dbh, "OCILobRead", 0, oci_status)) {
                     Ns_OracleFlush(dbh);
-                    Ns_DStringFree(&retval);
+                    Tcl_DStringFree(&retval);
                     Ns_Free(bufp);
                     return NS_ERROR;
                 }
 
                 Ns_SetPutValue(row, (size_t)i, Ns_DStringValue(&retval));
-                Ns_DStringFree(&retval);
+                Tcl_DStringFree(&retval);
                 Ns_Free(bufp);
             }
             break;
@@ -4659,13 +4659,13 @@ static sb4
 ora_append_buf_to_dstring(dvoid * ctxp, const dvoid *bufp, ub4 len,
                           ub1 piece)
 {
-    Ns_DString *retval = (Ns_DString *) ctxp;
+    Tcl_DString *retval = (Tcl_DString *) ctxp;
 
     switch (piece) {
         case OCI_LAST_PIECE:
         case OCI_FIRST_PIECE:
         case OCI_NEXT_PIECE:
-            Ns_DStringNAppend(retval, (char *) bufp, (TCL_SIZE_T)len);
+            Tcl_DStringAppend(retval, (char *) bufp, (TCL_SIZE_T)len);
             return OCI_CONTINUE;
 
         default:
@@ -5430,11 +5430,11 @@ ora_get_table_info(Ns_DbHandle * dbh, const char *table) {
 /*{{{ ora_table_list*/
 /* poke around in Oracle and see what are all the possible tables */
 static char *
-ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
+ora_table_list(Tcl_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
   NS_GNUC_NONNULL(1) NS_GNUC_NONNULL(2);
 
 static char *
-ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
+ora_table_list(Tcl_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
 {
     oci_status_t oci_status;
     ora_connection_t *connection;
@@ -5538,13 +5538,13 @@ ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
             downcase(owner_buf);
 
             if (strcmp(owner_buf, dbh->user))
-                Ns_DStringNAppend(pds, owner_buf, owner_fetch_length);
+                Tcl_DStringAppend(pds, owner_buf, owner_fetch_length);
         }
 
         table_name_buf[table_name_fetch_length] = 0;
         downcase(table_name_buf);
 
-        Ns_DStringNAppend(pds, table_name_buf,
+        Tcl_DStringAppend(pds, table_name_buf,
                           table_name_fetch_length + 1);
 
         if (system_tables_p)
@@ -5575,12 +5575,12 @@ ora_table_list(Ns_DString * pds, Ns_DbHandle * dbh, int system_tables_p)
 
 #if !defined(NS_AOLSERVER_3_PLUS)
 static char
-*ora_best_row_id(Ns_DString * pds, Ns_DbHandle * dbh, char *table)
+*ora_best_row_id(Tcl_DString * pds, Ns_DbHandle * dbh, char *table)
 {
     ns_ora_log(lexpos(), "entry (pds %p, dbh %p, table %s", pds, dbh,
         nilp(table));
 
-    Ns_DStringNAppend(pds, "rowid", 6);
+    Tcl_DStringAppend(pds, "rowid", 6);
 
     return pds->string;
 }
@@ -5753,7 +5753,7 @@ ora_table_command(ClientData UNUSED(cd), Tcl_Interp *interp,
         int argc, const char *argv[])
 {
     int result = TCL_ERROR;
-    Ns_DString tables_string;
+    Tcl_DString tables_string;
     char *tables, *scan;
 
     Ns_DbHandle *handle;
@@ -5782,12 +5782,12 @@ ora_table_command(ClientData UNUSED(cd), Tcl_Interp *interp,
             goto bailout;
         }
 
-        Ns_DStringInit(&tables_string);
+        Tcl_DStringInit(&tables_string);
 
         scan = ora_table_list(&tables_string, handle, 1);
 
         if (scan == NULL) {
-            Ns_DStringFree(&tables_string);
+            Tcl_DStringFree(&tables_string);
             goto bailout;
         }
 
@@ -5799,7 +5799,7 @@ ora_table_command(ClientData UNUSED(cd), Tcl_Interp *interp,
             scan += strlen(scan) + 1;
         }
 
-        Ns_DStringFree(&tables_string);
+        Tcl_DStringFree(&tables_string);
 
         if (exists_p) {
             Tcl_SetObjResult(interp, Tcl_NewIntObj(1));
@@ -5820,19 +5820,19 @@ ora_table_command(ClientData UNUSED(cd), Tcl_Interp *interp,
             system_tables_p = 1;
         }
 
-        Ns_DStringInit(&tables_string);
+        Tcl_DStringInit(&tables_string);
 
         tables = ora_table_list(&tables_string, handle, system_tables_p);
 
         if (tables == NULL) {
-            Ns_DStringFree(&tables_string);
+            Tcl_DStringFree(&tables_string);
             goto bailout;
         }
 
         for (scan = tables; *scan != '\000'; scan += strlen(scan) + 1) {
             Tcl_AppendElement(interp, scan);
         }
-        Ns_DStringFree(&tables_string);
+        Tcl_DStringFree(&tables_string);
 
     } else if (!strcmp(argv[1], "value")) {
         /* not used in ACS AFAIK */
