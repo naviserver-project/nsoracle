@@ -1,3 +1,80 @@
+commit bebfeecaa6468dc8287b86968f4b32e0e23d71ec
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2025-06-18
+
+    Replaced deprecated Ns_DString operations
+
+M	nsoracle.c
+
+commit bbeb16686ca8803006b0f35a3a905c6cb93fbde6
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-10-10
+
+    document configuration parameters
+
+M	README
+
+commit f9121f208b3a9d03e0e60562b314e994e32387dc
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-10-10
+
+    updated version number in README file
+
+M	README
+
+commit cbe92c235b0d53e357e3f5b79ed857d8c0332892
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-10-10
+
+    modernized configuration (range checks) and use Ns_ReturnCode when appropriate
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 9c443e12efe637d2f76f1538b96cd33708849381
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-10-10
+
+    whitespace cleanup
+
+M	nsoracle.h
+
+commit 96e3fab7c1c7fb88c4455fe01e86a7c3e4b7c57d
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-10-10
+
+    Code maintenance: add support for Tcl9, reduce compiler warnings
+    
+    The change reduces the number of implict type conversions and adjust the
+    datatypes for Tcl9. There is still a log way to adhere to the NaviServer
+    coding guidelines.
+    
+    Version bumped to 2.10
+
+M	nsoracle.c
+M	nsoracle.h
+
+commit 96956aed641ce29891c961e281e15a8a450a46e8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-09-27
+
+    Added experimental boolean configuration parameter "ConvertEncoding"
+    
+    When this Boolean parameter is true, the connection is created with
+    OCIEnvNlsCreate() instead of OCIEnvCreate(). OCIEnvNlsCreate was
+    introduced with Oracle9 and is an enhanced version of OCIEnvCreate()
+    which is used by default (legacy setting) or when ConvertEncoding is
+    not true.
+    
+    According to the documentation, using OCIEnvCreate() is equivalent to
+    OCIEnvNlsCreate() with character IDs set to 0. In this case, the
+    NLS_LANG setting is used, which should be "en_US.UTF-8" or
+    similar. However, since Oracle supports multiple UTF variants, it
+    sounds less adventurous to provide the encoding, which Tcl expects
+    (AL32UTF8: 1 to 4 bytes UTF-8), explicitly.
+
+M	nsoracle.c
+
 commit 237efaa476d92442bde3b9da549dd4422d49ffcf
 Author: Gustaf Neumann <neumann@wu-wien.ac.at>
 Date:   2023-04-25
