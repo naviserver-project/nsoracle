@@ -2680,17 +2680,17 @@ Ns_DbDriverInit (const char *hdriver, const char *config_path)
     debug_p = Ns_ConfigBool(config_path, "Debug", DEFAULT_DEBUG);
     convert_encoding_p = Ns_ConfigBool(config_path, "ConvertEncoding", NS_FALSE);
 
-    max_string_log_length = Ns_ConfigIntRange(config_path, "MaxStringLogLength", 100, INT_MAX,
-                                              DEFAULT_MAX_STRING_LOG_LENGTH);
-    char_expansion = Ns_ConfigIntRange(config_path, "CharExpansion", 1, 4, DEFAULT_CHAR_EXPANSION);
+    max_string_log_length = Ns_ConfigIntRange(config_path, "MaxStringLogLength", DEFAULT_MAX_STRING_LOG_LENGTH,
+                                              100, INT_MAX);
+    char_expansion = Ns_ConfigIntRange(config_path, "CharExpansion", DEFAULT_CHAR_EXPANSION, 1, 4);
 
-    lob_buffer_size = (unsigned int)Ns_ConfigIntRange(config_path, "LobBufferSize", 1, 128000, 16384);
+    lob_buffer_size = (unsigned int)Ns_ConfigIntRange(config_path, "LobBufferSize", 16384, 1, 128000);
     Ns_Log(Notice, "%s driver LobBufferSize = %d", hdriver, lob_buffer_size);
 
-    prefetch_rows = Ns_ConfigIntRange(config_path, "PrefetchRows", 0, 1000000, 0);
+    prefetch_rows = Ns_ConfigIntRange(config_path, "PrefetchRows", 0, 0, 1000000);
     Ns_Log(Notice, "%s driver PrefetchRows = %d", hdriver, prefetch_rows);
 
-    prefetch_memory = Ns_ConfigIntRange(config_path, "PrefetchMemory", 0, INT_MAX, 0);
+    prefetch_memory = Ns_ConfigIntRange(config_path, "PrefetchMemory", 0, 0, INT_MAX);
     Ns_Log(Notice, "%s driver PrefetchMemory = %d", hdriver, prefetch_memory);
 
     ns_ora_log(lexpos(), "entry (hdriver %p, config_path %s)", hdriver, nilp(config_path));
